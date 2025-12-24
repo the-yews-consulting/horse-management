@@ -140,7 +140,7 @@ export function Login() {
         </div>
 
         <p className="text-center text-gray-600 text-sm mt-6">
-          Secure authentication powered by Supabase
+          Secure authentication powered by The Yews
         </p>
       </div>
     </div>
