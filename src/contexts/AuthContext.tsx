@@ -3,7 +3,6 @@ import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 
 export type UserRole = 'super_admin' | 'admin' | 'moderator' | 'user';
-export type AccountStatus = 'pending' | 'enabled' | 'disabled';
 
 interface UserProfile {
   id: string;
@@ -11,7 +10,6 @@ interface UserProfile {
   full_name: string | null;
   role: UserRole;
   is_active: boolean;
-  account_status: AccountStatus;
 }
 
 interface AuthContextType {
@@ -88,28 +86,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
-
-      if (data.user) {
-        const profileData = await fetchProfile(data.user.id);
-
-        if (!profileData) {
-          await supabase.auth.signOut();
-          throw new Error('Your account is awaiting admin approval. Please try again later.');
-        }
-
-        if (profileData.account_status === 'pending') {
-          await supabase.auth.signOut();
-          throw new Error('Your account is pending approval. An administrator will review your account shortly.');
-        }
-
-        if (profileData.account_status === 'disabled') {
-          await supabase.auth.signOut();
-          throw new Error('Your account has been disabled. Please contact an administrator.');
-        }
-      }
-
       return { error: null };
     } catch (error) {
       return { error: error as Error };
