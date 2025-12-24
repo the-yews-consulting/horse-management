@@ -36,8 +36,9 @@ export function Login() {
     if (authError) {
       setError(authError.message);
     } else if (isSignUp) {
-      setSuccess('Account created successfully! Please sign in.');
+      setSuccess('Account created successfully! Please check your email to verify your address. Once verified, an admin will review your account.');
       setIsSignUp(false);
+      setEmail('');
       setPassword('');
     }
 

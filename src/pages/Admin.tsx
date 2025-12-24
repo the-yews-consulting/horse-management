@@ -30,12 +30,15 @@ interface UserAccount {
   raw_app_meta_data: any;
 }
 
+type AccountStatus = 'pending' | 'enabled' | 'disabled';
+
 interface UserProfile {
   id: string;
   email: string;
   full_name: string | null;
   role: UserRole;
   is_active: boolean;
+  account_status: AccountStatus;
   created_at: string;
   updated_at: string;
 }
@@ -305,6 +308,23 @@ export function Admin() {
       if (error) throw error;
 
       setToast({ message: `User ${isActive ? 'activated' : 'deactivated'} successfully`, type: 'success' });
+      fetchData();
+    } catch (error: any) {
+      setToast({ message: error.message, type: 'error' });
+    }
+  }
+
+  async function handleAccountStatusChange(profileId: string, newStatus: AccountStatus) {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ account_status: newStatus })
+        .eq('id', profileId);
+
+      if (error) throw error;
+
+      const statusLabel = newStatus === 'enabled' ? 'enabled' : newStatus === 'disabled' ? 'disabled' : 'set to pending';
+      setToast({ message: `Account ${statusLabel} successfully`, type: 'success' });
       fetchData();
     } catch (error: any) {
       setToast({ message: error.message, type: 'error' });
@@ -699,7 +719,10 @@ export function Admin() {
                     Current Role
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
+                    Account Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Active
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Created
@@ -712,7 +735,7 @@ export function Admin() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredUserProfiles.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                    <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
                       {searchTerm ? 'No user profiles found matching your search' : 'No user profiles found'}
                     </td>
                   </tr>
@@ -740,13 +763,29 @@ export function Admin() {
                         ) : (
                           <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                             profile.role === 'super_admin' ? 'bg-red-100 text-red-800' :
-                            profile.role === 'admin' ? 'bg-purple-100 text-purple-800' :
+                            profile.role === 'admin' ? 'bg-orange-100 text-orange-800' :
                             profile.role === 'moderator' ? 'bg-blue-100 text-blue-800' :
                             'bg-gray-100 text-gray-800'
                           }`}>
                             {userRoles.find(r => r.value === profile.role)?.label || profile.role}
                           </span>
                         )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <select
+                          value={profile.account_status}
+                          onChange={(e) => handleAccountStatusChange(profile.id, e.target.value as AccountStatus)}
+                          disabled={profile.id === user?.id}
+                          className={`text-xs px-2 py-1 border rounded font-semibold cursor-pointer focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed ${
+                            profile.account_status === 'enabled' ? 'bg-green-50 text-green-800 border-green-200' :
+                            profile.account_status === 'pending' ? 'bg-yellow-50 text-yellow-800 border-yellow-200' :
+                            'bg-red-50 text-red-800 border-red-200'
+                          }`}
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="enabled">Enabled</option>
+                          <option value="disabled">Disabled</option>
+                        </select>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <button
