@@ -95,6 +95,14 @@ export function Admin() {
   const [assigningRole, setAssigningRole] = useState(false);
   const [selectedUserForRole, setSelectedUserForRole] = useState<string>('');
   const [selectedRole, setSelectedRole] = useState<UserRole>('user');
+  const [showEditUserModal, setShowEditUserModal] = useState(false);
+  const [editingUserAccount, setEditingUserAccount] = useState<UserAccount | null>(null);
+  const [editUserFormData, setEditUserFormData] = useState({
+    full_name: '',
+    role: 'user' as UserRole,
+    account_status: 'pending' as 'pending' | 'enabled' | 'disabled',
+    is_active: true,
+  });
 
   const [formData, setFormData] = useState<TeamMemberFormData>({
     first_name: '',
@@ -418,6 +426,68 @@ export function Admin() {
     }
   }
 
+  async function openEditUserModal(account: UserAccount) {
+    setEditingUserAccount(account);
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', account.id)
+      .maybeSingle();
+
+    if (profile) {
+      setEditUserFormData({
+        full_name: profile.full_name || '',
+        role: profile.role,
+        account_status: profile.account_status,
+        is_active: profile.is_active,
+      });
+    } else {
+      setEditUserFormData({
+        full_name: account.raw_user_meta_data?.full_name || '',
+        role: 'user',
+        account_status: 'pending',
+        is_active: true,
+      });
+    }
+
+    setShowEditUserModal(true);
+  }
+
+  async function handleEditUserSubmit(e: React.FormEvent) {
+    e.preventDefault();
+
+    if (!editingUserAccount) return;
+
+    try {
+      const { error: upsertError } = await supabase
+        .from('profiles')
+        .upsert({
+          id: editingUserAccount.id,
+          email: editingUserAccount.email,
+          full_name: editUserFormData.full_name || null,
+          role: editUserFormData.role,
+          account_status: editUserFormData.account_status,
+          is_active: editUserFormData.is_active,
+        }, {
+          onConflict: 'id'
+        });
+
+      if (upsertError) throw upsertError;
+
+      setToast({ message: 'User account updated successfully', type: 'success' });
+      setShowEditUserModal(false);
+      setEditingUserAccount(null);
+      fetchData();
+
+      if (editingUserAccount.id === user?.id) {
+        await refreshProfile();
+      }
+    } catch (error: any) {
+      setToast({ message: error.message, type: 'error' });
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -645,12 +715,17 @@ export function Admin() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     User ID
                   </th>
+                  {(isAdmin || isSuperAdmin) && (
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredUserAccounts.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                    <td colSpan={(isAdmin || isSuperAdmin) ? 7 : 6} className="px-6 py-8 text-center text-gray-500">
                       {searchTerm ? 'No user accounts found matching your search' : 'No user accounts found'}
                     </td>
                   </tr>
@@ -695,6 +770,16 @@ export function Admin() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-xs text-gray-500 font-mono">{account.id.slice(0, 8)}...</div>
                       </td>
+                      {(isAdmin || isSuperAdmin) && (
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <button
+                            onClick={() => openEditUserModal(account)}
+                            className="text-blue-600 hover:text-blue-900"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   ))
                 )}
@@ -1174,6 +1259,114 @@ export function Admin() {
                     }}
                     disabled={assigningRole}
                     className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showEditUserModal && editingUserAccount && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-md w-full">
+            <div className="p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                Edit User Account
+              </h2>
+
+              <form onSubmit={handleEditUserSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={editingUserAccount.email}
+                    disabled
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+                </div>
+
+                <div>
+                  <label htmlFor="edit-full-name" className="block text-sm font-medium text-gray-700 mb-1">
+                    Full Name
+                  </label>
+                  <input
+                    id="edit-full-name"
+                    type="text"
+                    value={editUserFormData.full_name}
+                    onChange={(e) => setEditUserFormData({ ...editUserFormData, full_name: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="John Doe"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="edit-role" className="block text-sm font-medium text-gray-700 mb-1">
+                    Role *
+                  </label>
+                  <select
+                    id="edit-role"
+                    required
+                    value={editUserFormData.role}
+                    onChange={(e) => setEditUserFormData({ ...editUserFormData, role: e.target.value as UserRole })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    {userRoles.map(role => (
+                      <option key={role.value} value={role.value}>
+                        {role.label} - {role.description}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="edit-account-status" className="block text-sm font-medium text-gray-700 mb-1">
+                    Account Status *
+                  </label>
+                  <select
+                    id="edit-account-status"
+                    required
+                    value={editUserFormData.account_status}
+                    onChange={(e) => setEditUserFormData({ ...editUserFormData, account_status: e.target.value as 'pending' | 'enabled' | 'disabled' })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="enabled">Enabled</option>
+                    <option value="disabled">Disabled</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={editUserFormData.is_active}
+                      onChange={(e) => setEditUserFormData({ ...editUserFormData, is_active: e.target.checked })}
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <span className="text-sm font-medium text-gray-700">Active User</span>
+                  </label>
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Update User
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowEditUserModal(false);
+                      setEditingUserAccount(null);
+                    }}
+                    className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                   >
                     Cancel
                   </button>
