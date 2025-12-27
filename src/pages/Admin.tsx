@@ -36,6 +36,7 @@ interface UserProfile {
   full_name: string | null;
   role: UserRole;
   is_active: boolean;
+  account_status: 'pending' | 'enabled' | 'disabled';
   created_at: string;
   updated_at: string;
 }
@@ -306,6 +307,26 @@ export function Admin() {
 
       setToast({ message: `User ${isActive ? 'activated' : 'deactivated'} successfully`, type: 'success' });
       fetchData();
+    } catch (error: any) {
+      setToast({ message: error.message, type: 'error' });
+    }
+  }
+
+  async function handleAccountStatusChange(profileId: string, newStatus: 'pending' | 'enabled' | 'disabled') {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ account_status: newStatus })
+        .eq('id', profileId);
+
+      if (error) throw error;
+
+      setToast({ message: `Account status updated to ${newStatus}`, type: 'success' });
+      fetchData();
+
+      if (profileId === user?.id) {
+        await refreshProfile();
+      }
     } catch (error: any) {
       setToast({ message: error.message, type: 'error' });
     }
@@ -699,7 +720,10 @@ export function Admin() {
                     Current Role
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
+                    Account Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Active
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Created
@@ -712,7 +736,7 @@ export function Admin() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredUserProfiles.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                    <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
                       {searchTerm ? 'No user profiles found matching your search' : 'No user profiles found'}
                     </td>
                   </tr>
@@ -747,6 +771,21 @@ export function Admin() {
                             {userRoles.find(r => r.value === profile.role)?.label || profile.role}
                           </span>
                         )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <select
+                          value={profile.account_status}
+                          onChange={(e) => handleAccountStatusChange(profile.id, e.target.value as 'pending' | 'enabled' | 'disabled')}
+                          className={`text-xs border border-gray-300 rounded px-2 py-1 font-semibold focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            profile.account_status === 'enabled' ? 'bg-green-100 text-green-800' :
+                            profile.account_status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-red-100 text-red-800'
+                          }`}
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="enabled">Enabled</option>
+                          <option value="disabled">Disabled</option>
+                        </select>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <button
