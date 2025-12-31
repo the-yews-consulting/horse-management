@@ -1,39 +1,42 @@
-import { Home } from './pages/Home';
-import { About } from './pages/About';
-import { Services } from './pages/Services';
-import { Contact } from './pages/Contact';
-import { Navigation } from './components/Navigation';
-import { Footer } from './components/Footer';
-import { useState } from 'react';
+import { HomeAssistantProvider, useHomeAssistant } from './contexts/HomeAssistantContext';
+import { LoginPage } from './pages/LoginPage';
+import { Dashboard } from './pages/Dashboard';
+import { Header } from './components/Header';
+import { Loader2 } from 'lucide-react';
 
-export type Page = 'home' | 'about' | 'services' | 'contact';
+function AppContent() {
+  const { isConnected, isConnecting } = useHomeAssistant();
 
-function App() {
-  const [currentPage, setCurrentPage] = useState<Page>('home');
+  if (isConnecting) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 text-blue-600 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600 font-medium">Connecting to Home Assistant...</p>
+        </div>
+      </div>
+    );
+  }
 
-  const renderPage = () => {
-    switch (currentPage) {
-      case 'home':
-        return <Home />;
-      case 'about':
-        return <About />;
-      case 'services':
-        return <Services />;
-      case 'contact':
-        return <Contact />;
-      default:
-        return <Home />;
-    }
-  };
+  if (!isConnected) {
+    return <LoginPage />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navigation currentPage={currentPage} setCurrentPage={setCurrentPage} />
-      <main>
-        {renderPage()}
+      <Header />
+      <main className="px-4 sm:px-6 lg:px-8 py-8 max-w-[1920px] mx-auto">
+        <Dashboard />
       </main>
-      <Footer />
     </div>
+  );
+}
+
+function App() {
+  return (
+    <HomeAssistantProvider>
+      <AppContent />
+    </HomeAssistantProvider>
   );
 }
 
