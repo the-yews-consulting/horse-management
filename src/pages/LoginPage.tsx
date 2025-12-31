@@ -22,13 +22,8 @@ export function LoginPage() {
       return;
     }
 
-    let formattedUrl = url.trim();
-    if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
-      formattedUrl = 'http://' + formattedUrl;
-    }
-
     try {
-      await connect({ url: formattedUrl, token: token.trim() });
+      await connect({ url: url.trim(), token: token.trim() });
     } catch (err) {
       setFormError('Failed to connect. Please check your credentials.');
     }

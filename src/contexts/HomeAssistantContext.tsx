@@ -50,12 +50,26 @@ export function HomeAssistantProvider({ children }: HomeAssistantProviderProps) 
     setError(null);
 
     try {
-      localStorage.setItem('ha_url', config.url);
+      let formattedUrl = config.url.trim();
+
+      // Ensure URL has protocol
+      if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
+        formattedUrl = 'http://' + formattedUrl;
+      }
+
+      // Validate URL format
+      try {
+        new URL(formattedUrl);
+      } catch {
+        throw new Error('Invalid URL format. Please enter a valid Home Assistant URL (e.g., http://homeassistant.local:8123)');
+      }
+
+      localStorage.setItem('ha_url', formattedUrl);
       localStorage.setItem('ha_token', config.token);
 
       const conn = await createConnection({
         auth: {
-          hassUrl: config.url,
+          hassUrl: formattedUrl,
           access_token: config.token,
         },
       });
