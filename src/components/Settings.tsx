@@ -17,11 +17,11 @@ export function Settings() {
   const loadSettings = async () => {
     setLoading(true);
     try {
-      const urlResponse = await fetch('http://localhost:3000/api/config/ha_url');
+      const urlResponse = await fetch('/api/config/ha_url');
       const urlData = await urlResponse.json();
       setUrl(urlData.value || '');
 
-      const tokenResponse = await fetch('http://localhost:3000/api/config/ha_token');
+      const tokenResponse = await fetch('/api/config/ha_token');
       const tokenData = await tokenResponse.json();
       setToken(tokenData.value || '');
     } catch (error) {
@@ -35,15 +35,22 @@ export function Settings() {
     setSaving(true);
     setSaveMessage(null);
     try {
-      await fetch('http://localhost:3000/api/config/token', {
+      const response = await fetch('/api/config/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url, token })
       });
-      setSaveMessage('Settings saved successfully');
-      setTimeout(() => setSaveMessage(null), 3000);
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setSaveMessage('Settings saved successfully');
+        setTimeout(() => setSaveMessage(null), 3000);
+      } else {
+        setSaveMessage(data.error || 'Failed to save settings');
+      }
     } catch (error) {
-      setSaveMessage('Failed to save settings');
+      setSaveMessage('Failed to save settings: Network error');
       console.error('Failed to save settings:', error);
     } finally {
       setSaving(false);
@@ -54,22 +61,22 @@ export function Settings() {
     setTesting(true);
     setTestResult(null);
     try {
-      await fetch('http://localhost:3000/api/config/token', {
+      const saveResponse = await fetch('/api/config/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url, token })
       });
 
-      const response = await fetch('http://localhost:3000/api/verify');
-      const data = await response.json();
+      const saveData = await saveResponse.json();
 
-      if (data.success) {
+      if (saveResponse.ok && saveData.success) {
         setTestResult({ success: true, message: 'Connection successful' });
       } else {
-        setTestResult({ success: false, message: data.error || 'Connection failed' });
+        setTestResult({ success: false, message: saveData.error || 'Connection failed' });
       }
     } catch (error) {
-      setTestResult({ success: false, message: 'Connection test failed' });
+      const errorMessage = error instanceof Error ? error.message : 'Connection test failed';
+      setTestResult({ success: false, message: errorMessage });
       console.error('Failed to test connection:', error);
     } finally {
       setTesting(false);

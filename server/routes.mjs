@@ -47,6 +47,24 @@ router.get('/config/token', async (req, res) => {
   }
 });
 
+router.get('/config/ha_url', async (req, res) => {
+  try {
+    const url = await getConfig('ha_url');
+    res.json({ value: url || '' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get('/config/ha_token', async (req, res) => {
+  try {
+    const token = await getConfig('ha_token');
+    res.json({ value: token || '' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.get('/config/websocket', async (req, res) => {
   try {
     const token = await getConfig('ha_token');

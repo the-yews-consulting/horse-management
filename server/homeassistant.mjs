@@ -21,13 +21,24 @@ export async function callHomeAssistantAPI(endpoint, method = 'GET', body = null
     options.body = JSON.stringify(body);
   }
 
-  const response = await fetch(url, options);
+  try {
+    const response = await fetch(url, options);
 
-  if (!response.ok) {
-    throw new Error(`Home Assistant API error: ${response.status} ${response.statusText}`);
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => response.statusText);
+      throw new Error(`Home Assistant API error (${response.status}): ${errorText}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    if (error.message.includes('fetch failed') || error.code === 'ECONNREFUSED') {
+      throw new Error(`Cannot connect to ${haUrl}. Check URL and network connection.`);
+    }
+    if (error.message.includes('certificate') || error.code === 'CERT_HAS_EXPIRED') {
+      throw new Error(`SSL certificate error connecting to ${haUrl}. Check certificate validity.`);
+    }
+    throw error;
   }
-
-  return await response.json();
 }
 
 export async function getStates() {
