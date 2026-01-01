@@ -46,6 +46,24 @@ router.get('/config/token', async (req, res) => {
   }
 });
 
+router.get('/config/websocket', async (req, res) => {
+  try {
+    const token = await getConfig('ha_token');
+    const url = await getConfig('ha_url') || 'http://localhost:8123';
+
+    if (!token) {
+      return res.status(401).json({ error: 'Token not configured' });
+    }
+
+    res.json({
+      url,
+      token
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.delete('/config/token', async (req, res) => {
   try {
     await deleteConfig('ha_token');

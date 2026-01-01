@@ -75,3 +75,16 @@ export async function callService(domain: string, service: string, data: any): P
 
   return await response.json();
 }
+
+export interface WebSocketConfig {
+  url: string;
+  token: string;
+}
+
+export async function getWebSocketConfig(): Promise<WebSocketConfig> {
+  const response = await fetch(`${API_BASE_URL}/config/websocket`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch WebSocket config');
+  }
+  return await response.json();
+}

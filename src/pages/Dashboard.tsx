@@ -76,13 +76,8 @@ export function Dashboard() {
   };
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      refreshEntities();
-      setLastRefresh(new Date());
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, [refreshEntities]);
+    setLastRefresh(new Date());
+  }, [entities]);
 
   if (entityList.length === 0) {
     return (
@@ -194,7 +189,7 @@ export function Dashboard() {
         )}
 
         <div className="mt-4 text-xs text-gray-500">
-          Last updated: {lastRefresh.toLocaleTimeString()} (auto-refresh every 30s)
+          Last updated: {lastRefresh.toLocaleTimeString()} (real-time updates via WebSocket)
         </div>
       </div>
 

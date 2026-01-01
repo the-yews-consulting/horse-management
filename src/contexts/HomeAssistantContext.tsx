@@ -1,6 +1,8 @@
-import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback, useRef } from 'react';
 import * as api from '../services/api';
 import { HassEntity } from '../types/homeassistant';
+import { connectWebSocket, disconnectWebSocket, subscribeToEntities } from '../services/websocket';
+import { Connection, HassEntities } from 'home-assistant-js-websocket';
 
 interface HomeAssistantContextType {
   entities: Record<string, HassEntity>;
@@ -33,6 +35,8 @@ export function HomeAssistantProvider({ children }: HomeAssistantProviderProps) 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hasToken, setHasToken] = useState(false);
+  const connectionRef = useRef<Connection | null>(null);
+  const unsubscribeRef = useRef<(() => void) | null>(null);
 
   const refreshEntities = useCallback(async () => {
     try {
@@ -50,10 +54,46 @@ export function HomeAssistantProvider({ children }: HomeAssistantProviderProps) 
     }
   }, []);
 
+  const handleEntitiesUpdate = useCallback((hassEntities: HassEntities) => {
+    setEntities(hassEntities as Record<string, HassEntity>);
+    setIsConnected(true);
+    setError(null);
+  }, []);
+
+  const setupWebSocket = useCallback(async () => {
+    try {
+      const wsConfig = await api.getWebSocketConfig();
+      const conn = await connectWebSocket(wsConfig.url, wsConfig.token);
+      connectionRef.current = conn;
+
+      const unsubscribe = subscribeToEntities(conn, handleEntitiesUpdate);
+      unsubscribeRef.current = unsubscribe;
+
+      setIsConnected(true);
+      setError(null);
+    } catch (err) {
+      console.error('WebSocket connection error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to connect via WebSocket');
+      setIsConnected(false);
+
+      await refreshEntities();
+    }
+  }, [handleEntitiesUpdate, refreshEntities]);
+
+  const cleanupWebSocket = useCallback(() => {
+    if (unsubscribeRef.current) {
+      unsubscribeRef.current();
+      unsubscribeRef.current = null;
+    }
+    if (connectionRef.current) {
+      disconnectWebSocket();
+      connectionRef.current = null;
+    }
+  }, []);
+
   const callService = async (domain: string, service: string, serviceData?: any) => {
     try {
       await api.callService(domain, service, serviceData);
-      await refreshEntities();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to call service');
       throw err;
@@ -62,6 +102,7 @@ export function HomeAssistantProvider({ children }: HomeAssistantProviderProps) 
 
   const logout = async () => {
     try {
+      cleanupWebSocket();
       await api.deleteToken();
       setHasToken(false);
       setEntities({});
@@ -79,7 +120,7 @@ export function HomeAssistantProvider({ children }: HomeAssistantProviderProps) 
       if (status.hasToken) {
         const verification = await api.verifyConnection();
         if (verification.success) {
-          await refreshEntities();
+          await setupWebSocket();
         } else {
           setError(verification.error || 'Connection failed');
           setIsConnected(false);
@@ -97,14 +138,16 @@ export function HomeAssistantProvider({ children }: HomeAssistantProviderProps) 
   useEffect(() => {
     checkTokenStatus();
 
-    const interval = setInterval(() => {
-      if (hasToken) {
-        refreshEntities();
-      }
-    }, 5000);
+    return () => {
+      cleanupWebSocket();
+    };
+  }, []);
 
-    return () => clearInterval(interval);
-  }, [hasToken, refreshEntities]);
+  useEffect(() => {
+    if (hasToken && !connectionRef.current) {
+      setupWebSocket();
+    }
+  }, [hasToken, setupWebSocket]);
 
   return (
     <HomeAssistantContext.Provider
