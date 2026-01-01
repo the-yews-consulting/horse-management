@@ -1,42 +1,49 @@
-import { HomeAssistantProvider, useHomeAssistant } from './contexts/HomeAssistantContext';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import { HomeAssistantProvider } from './contexts/HomeAssistantContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import { MainLayout } from './components/Layout/MainLayout';
 import { LoginPage } from './pages/LoginPage';
-import { Dashboard } from './pages/Dashboard';
-import { Header } from './components/Header';
-import { Loader2 } from 'lucide-react';
-
-function AppContent() {
-  const { hasToken, isLoading, refreshEntities } = useHomeAssistant();
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 text-blue-600 animate-spin mx-auto mb-4" />
-          <p className="text-gray-600 font-medium">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!hasToken) {
-    return <LoginPage onLoginSuccess={refreshEntities} />;
-  }
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <main className="px-4 sm:px-6 lg:px-8 py-8 max-w-[1920px] mx-auto">
-        <Dashboard />
-      </main>
-    </div>
-  );
-}
+import { StableDashboard } from './pages/StableDashboard';
+import { HorsesPage } from './pages/HorsesPage';
+import { StallsPage } from './pages/StallsPage';
+import { OwnersPage } from './pages/OwnersPage';
+import { VetsFarriersPage } from './pages/VetsFarriersPage';
+import { WhiteboardPage } from './pages/WhiteboardPage';
+import { HomeAssistantPage } from './pages/HomeAssistantPage';
+import { AdminPage } from './pages/AdminPage';
 
 function App() {
   return (
-    <HomeAssistantProvider>
-      <AppContent />
-    </HomeAssistantProvider>
+    <Router>
+      <AuthProvider>
+        <HomeAssistantProvider>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <MainLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<StableDashboard />} />
+              <Route path="horses" element={<HorsesPage />} />
+              <Route path="stalls" element={<ProtectedRoute requiredRoles={['admin', 'staff']}><StallsPage /></ProtectedRoute>} />
+              <Route path="owners" element={<ProtectedRoute requiredRoles={['admin', 'staff']}><OwnersPage /></ProtectedRoute>} />
+              <Route path="vets-farriers" element={<ProtectedRoute requiredRoles={['admin', 'staff']}><VetsFarriersPage /></ProtectedRoute>} />
+              <Route path="whiteboard" element={<ProtectedRoute requiredRoles={['admin', 'staff']}><WhiteboardPage /></ProtectedRoute>} />
+              <Route path="home-assistant" element={<ProtectedRoute requiredRoles={['admin', 'staff']}><HomeAssistantPage /></ProtectedRoute>} />
+              <Route path="admin" element={<ProtectedRoute requiredRoles={['admin']}><AdminPage /></ProtectedRoute>} />
+            </Route>
+
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </HomeAssistantProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 
