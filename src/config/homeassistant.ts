@@ -4,7 +4,7 @@
 
 export const HOME_ASSISTANT_CONFIG = {
   // Your Home Assistant URL (e.g., 'http://homeassistant.local:8123' or 'https://your-ha-instance.duckdns.org')
-  url: 'http://homeassistant.local:8123',
+  url: 'https://ubijd9zvct3uaenhmtl4xihltxgk8bo8.ui.nabu.casa',
 
   // Your Home Assistant Long-Lived Access Token
   // Generate one at: Profile → Security → Long-Lived Access Tokens
