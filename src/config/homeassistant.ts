@@ -4,11 +4,11 @@
 
 export const HOME_ASSISTANT_CONFIG = {
   // Your Home Assistant URL (e.g., 'http://homeassistant.local:8123' or 'https://your-ha-instance.duckdns.org')
-  url: '',
+  url: 'http://homeassistant.local:8123',
 
   // Your Home Assistant Long-Lived Access Token
   // Generate one at: Profile → Security → Long-Lived Access Tokens
-  token: '',
+  token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI4OWNkMTJhZDdjMmU0MDc0YTc2ZDg2ODM1NzQ2OGQzMCIsImlhdCI6MTc2NzIzMzY0OSwiZXhwIjoyMDgyNTkzNjQ5fQ.BxGsLdwOmhzklOSbBavFQOU681VaT3um7qZ0x1sRMyo',
 } as const;
 
 // Storage keys for localStorage
