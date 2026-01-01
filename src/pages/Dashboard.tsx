@@ -1,7 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useHomeAssistant } from '../contexts/HomeAssistantContext';
 import { EntityCard } from '../components/EntityCard';
-import { getEntityDomain } from '../utils/entityHelpers';
+import { SensorTable } from '../components/SensorTable';
+import { getEntityDomain, filterSensors } from '../utils/entityHelpers';
 import {
   Home,
   Lightbulb,
@@ -10,16 +11,28 @@ import {
   Activity,
   LayoutGrid,
   Search,
+  RefreshCw,
+  Table,
+  Grid3x3,
 } from 'lucide-react';
 
+type ViewMode = 'cards' | 'sensors';
+
 export function Dashboard() {
-  const { entities } = useHomeAssistant();
+  const { entities, refreshEntities } = useHomeAssistant();
   const [selectedDomain, setSelectedDomain] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState<ViewMode>('cards');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
 
   const entityList = useMemo(() => {
     return Object.values(entities);
   }, [entities]);
+
+  const sensors = useMemo(() => {
+    return filterSensors(entityList);
+  }, [entityList]);
 
   const domainCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -52,6 +65,25 @@ export function Dashboard() {
     { id: 'sensor', label: 'Sensors', icon: Activity, count: domainCounts.sensor || 0 },
   ];
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await refreshEntities();
+      setLastRefresh(new Date());
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 500);
+    }
+  };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refreshEntities();
+      setLastRefresh(new Date());
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [refreshEntities]);
+
   if (entityList.length === 0) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -69,62 +101,121 @@ export function Dashboard() {
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-xl shadow-sm p-4">
-        <div className="relative mb-4">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-gray-400" />
-          </div>
-          <input
-            type="text"
-            placeholder="Search entities..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-          />
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          {domainFilters.map((filter) => {
-            if (filter.count === 0 && filter.id !== 'all') return null;
-
-            return (
-              <button
-                key={filter.id}
-                onClick={() => setSelectedDomain(filter.id)}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition ${
-                  selectedDomain === filter.id
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setViewMode('cards')}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition ${
+                viewMode === 'cards'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <Grid3x3 className="h-4 w-4" />
+              <span>Cards</span>
+            </button>
+            <button
+              onClick={() => setViewMode('sensors')}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition ${
+                viewMode === 'sensors'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <Table className="h-4 w-4" />
+              <span>Sensors</span>
+              <span
+                className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                  viewMode === 'sensors'
+                    ? 'bg-blue-700 text-blue-100'
+                    : 'bg-gray-200 text-gray-600'
                 }`}
               >
-                <filter.icon className="h-4 w-4" />
-                <span>{filter.label}</span>
-                <span
-                  className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                    selectedDomain === filter.id
-                      ? 'bg-blue-700 text-blue-100'
-                      : 'bg-gray-200 text-gray-600'
-                  }`}
-                >
-                  {filter.count}
-                </span>
-              </button>
-            );
-          })}
+                {sensors.length}
+              </span>
+            </button>
+          </div>
+
+          <button
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition disabled:opacity-50"
+          >
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <span>Refresh</span>
+          </button>
+        </div>
+
+        {viewMode === 'cards' && (
+          <>
+            <div className="relative mb-4">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search entities..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              />
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {domainFilters.map((filter) => {
+                if (filter.count === 0 && filter.id !== 'all') return null;
+
+                return (
+                  <button
+                    key={filter.id}
+                    onClick={() => setSelectedDomain(filter.id)}
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition ${
+                      selectedDomain === filter.id
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    <filter.icon className="h-4 w-4" />
+                    <span>{filter.label}</span>
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                        selectedDomain === filter.id
+                          ? 'bg-blue-700 text-blue-100'
+                          : 'bg-gray-200 text-gray-600'
+                      }`}
+                    >
+                      {filter.count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        )}
+
+        <div className="mt-4 text-xs text-gray-500">
+          Last updated: {lastRefresh.toLocaleTimeString()} (auto-refresh every 30s)
         </div>
       </div>
 
-      {filteredEntities.length === 0 ? (
-        <div className="text-center py-12">
-          <Activity className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">No entities found</h3>
-          <p className="text-gray-600">Try adjusting your filters or search query</p>
-        </div>
+      {viewMode === 'sensors' ? (
+        <SensorTable sensors={sensors} />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredEntities.map((entity) => (
-            <EntityCard key={entity.entity_id} entity={entity} />
-          ))}
-        </div>
+        <>
+          {filteredEntities.length === 0 ? (
+            <div className="text-center py-12">
+              <Activity className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No entities found</h3>
+              <p className="text-gray-600">Try adjusting your filters or search query</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredEntities.map((entity) => (
+                <EntityCard key={entity.entity_id} entity={entity} />
+              ))}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

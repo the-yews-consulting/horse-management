@@ -89,3 +89,29 @@ export function groupEntitiesByDomain(entities: HassEntity[]): Record<string, Ha
     return groups;
   }, {} as Record<string, HassEntity[]>);
 }
+
+export function isSensor(entity: HassEntity): boolean {
+  const domain = getEntityDomain(entity.entity_id);
+  return domain === 'sensor' || domain === 'binary_sensor';
+}
+
+export function filterSensors(entities: HassEntity[]): HassEntity[] {
+  return entities.filter(isSensor);
+}
+
+export function formatSensorValue(entity: HassEntity): string {
+  const domain = getEntityDomain(entity.entity_id);
+
+  if (domain === 'binary_sensor') {
+    return entity.state === 'on' ? 'On' : 'Off';
+  }
+
+  const unit = entity.attributes.unit_of_measurement || '';
+  const value = entity.state;
+
+  if (value === 'unknown' || value === 'unavailable') {
+    return value.charAt(0).toUpperCase() + value.slice(1);
+  }
+
+  return unit ? `${value} ${unit}` : value;
+}
