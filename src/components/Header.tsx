@@ -2,7 +2,7 @@ import { useHomeAssistant } from '../contexts/HomeAssistantContext';
 import { Home, LogOut, Wifi, WifiOff, AlertCircle } from 'lucide-react';
 
 export function Header() {
-  const { isConnected, disconnect, error } = useHomeAssistant();
+  const { isConnected, logout, error } = useHomeAssistant();
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
@@ -36,11 +36,11 @@ export function Header() {
             </div>
 
             <button
-              onClick={disconnect}
+              onClick={logout}
               className="flex items-center space-x-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition text-gray-700 font-medium"
             >
               <LogOut className="h-4 w-4" />
-              <span className="hidden sm:inline">Disconnect</span>
+              <span className="hidden sm:inline">Logout</span>
             </button>
           </div>
         </div>

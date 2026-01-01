@@ -1,28 +1,16 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import {
-  createConnection,
-  subscribeEntities,
-  callService,
-  Connection,
-  HassEntities,
-  HassEntity,
-} from 'home-assistant-js-websocket';
-import { HOME_ASSISTANT_CONFIG, STORAGE_KEYS } from '../config/homeassistant';
-
-interface ConnectionConfig {
-  url: string;
-  token: string;
-}
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import * as api from '../services/api';
+import { HassEntity } from '../types/homeassistant';
 
 interface HomeAssistantContextType {
-  connection: Connection | null;
-  entities: HassEntities;
+  entities: Record<string, HassEntity>;
   isConnected: boolean;
-  isConnecting: boolean;
+  isLoading: boolean;
   error: string | null;
-  connect: (config: ConnectionConfig) => Promise<void>;
-  disconnect: () => void;
+  hasToken: boolean;
+  refreshEntities: () => Promise<void>;
   callService: (domain: string, service: string, serviceData?: any) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 const HomeAssistantContext = createContext<HomeAssistantContextType | undefined>(undefined);
@@ -40,118 +28,95 @@ interface HomeAssistantProviderProps {
 }
 
 export function HomeAssistantProvider({ children }: HomeAssistantProviderProps) {
-  const [connection, setConnection] = useState<Connection | null>(null);
-  const [entities, setEntities] = useState<HassEntities>({});
+  const [entities, setEntities] = useState<Record<string, HassEntity>>({});
   const [isConnected, setIsConnected] = useState(false);
-  const [isConnecting, setIsConnecting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [hasToken, setHasToken] = useState(false);
 
-  const connect = async (config: ConnectionConfig) => {
-    setIsConnecting(true);
-    setError(null);
-
+  const refreshEntities = useCallback(async () => {
     try {
-      let formattedUrl = config.url.trim();
-
-      // Ensure URL has protocol
-      if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
-        formattedUrl = 'http://' + formattedUrl;
-      }
-
-      // Validate URL format
-      try {
-        new URL(formattedUrl);
-      } catch {
-        throw new Error('Invalid URL format. Please enter a valid Home Assistant URL (e.g., http://homeassistant.local:8123)');
-      }
-
-      localStorage.setItem(STORAGE_KEYS.HA_URL, formattedUrl);
-      localStorage.setItem(STORAGE_KEYS.HA_TOKEN, config.token);
-
-      const conn = await createConnection({
-        auth: {
-          hassUrl: formattedUrl,
-          access_token: config.token,
-        },
+      const states = await api.getStates();
+      const entitiesMap: Record<string, HassEntity> = {};
+      states.forEach((state: HassEntity) => {
+        entitiesMap[state.entity_id] = state;
       });
-
-      setConnection(conn);
+      setEntities(entitiesMap);
       setIsConnected(true);
-
-      subscribeEntities(conn, (ent) => setEntities(ent));
-
-      conn.addEventListener('ready', () => {
-        setIsConnected(true);
-        setError(null);
-      });
-
-      conn.addEventListener('disconnected', () => {
-        setIsConnected(false);
-      });
-
-      conn.addEventListener('reconnect-error', () => {
-        setError('Failed to reconnect to Home Assistant');
-      });
+      setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to connect to Home Assistant');
+      setError(err instanceof Error ? err.message : 'Failed to fetch entities');
+      setIsConnected(false);
+    }
+  }, []);
+
+  const callService = async (domain: string, service: string, serviceData?: any) => {
+    try {
+      await api.callService(domain, service, serviceData);
+      await refreshEntities();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to call service');
+      throw err;
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await api.deleteToken();
+      setHasToken(false);
+      setEntities({});
+      setIsConnected(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to logout');
+    }
+  };
+
+  const checkTokenStatus = async () => {
+    try {
+      const status = await api.getTokenStatus();
+      setHasToken(status.hasToken);
+
+      if (status.hasToken) {
+        const verification = await api.verifyConnection();
+        if (verification.success) {
+          await refreshEntities();
+        } else {
+          setError(verification.error || 'Connection failed');
+          setIsConnected(false);
+        }
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to check connection');
+      setHasToken(false);
       setIsConnected(false);
     } finally {
-      setIsConnecting(false);
+      setIsLoading(false);
     }
-  };
-
-  const disconnect = () => {
-    if (connection) {
-      connection.close();
-      setConnection(null);
-      setIsConnected(false);
-      setEntities({});
-      localStorage.removeItem(STORAGE_KEYS.HA_URL);
-      localStorage.removeItem(STORAGE_KEYS.HA_TOKEN);
-    }
-  };
-
-  const handleCallService = async (domain: string, service: string, serviceData?: any) => {
-    if (!connection) {
-      throw new Error('Not connected to Home Assistant');
-    }
-    await callService(connection, domain, service, serviceData);
   };
 
   useEffect(() => {
-    const savedUrl = localStorage.getItem(STORAGE_KEYS.HA_URL);
-    const savedToken = localStorage.getItem(STORAGE_KEYS.HA_TOKEN);
+    checkTokenStatus();
 
-    // Try localStorage first, then fall back to config file
-    const urlToUse = savedUrl || HOME_ASSISTANT_CONFIG.url;
-    const tokenToUse = savedToken || HOME_ASSISTANT_CONFIG.token;
-
-    if (urlToUse && tokenToUse) {
-      connect({ url: urlToUse, token: tokenToUse }).catch(() => {
-        // Clear invalid saved credentials
-        localStorage.removeItem(STORAGE_KEYS.HA_URL);
-        localStorage.removeItem(STORAGE_KEYS.HA_TOKEN);
-      });
-    }
-
-    return () => {
-      if (connection) {
-        connection.close();
+    const interval = setInterval(() => {
+      if (hasToken) {
+        refreshEntities();
       }
-    };
-  }, []);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [hasToken, refreshEntities]);
 
   return (
     <HomeAssistantContext.Provider
       value={{
-        connection,
         entities,
         isConnected,
-        isConnecting,
+        isLoading,
         error,
-        connect,
-        disconnect,
-        callService: handleCallService,
+        hasToken,
+        refreshEntities,
+        callService,
+        logout,
       }}
     >
       {children}

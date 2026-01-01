@@ -1,31 +1,43 @@
 import { useState } from 'react';
-import { useHomeAssistant } from '../contexts/HomeAssistantContext';
+import * as api from '../services/api';
 import { Home, Lock, AlertCircle, Loader2 } from 'lucide-react';
 
-export function LoginPage() {
-  const { connect, isConnecting, error } = useHomeAssistant();
-  const [url, setUrl] = useState('');
+interface LoginPageProps {
+  onLoginSuccess: () => void;
+}
+
+export function LoginPage({ onLoginSuccess }: LoginPageProps) {
+  const [url, setUrl] = useState('http://localhost:8123');
   const [token, setToken] = useState('');
-  const [formError, setFormError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFormError('');
-
-    if (!url.trim()) {
-      setFormError('Please enter your Home Assistant URL');
-      return;
-    }
+    setError('');
 
     if (!token.trim()) {
-      setFormError('Please enter your access token');
+      setError('Please enter your access token');
       return;
     }
 
+    setIsLoading(true);
+
     try {
-      await connect({ url: url.trim(), token: token.trim() });
+      const result = await api.saveToken({
+        token: token.trim(),
+        url: url.trim() || 'http://localhost:8123'
+      });
+
+      if (result.success) {
+        onLoginSuccess();
+      } else {
+        setError(result.error || 'Failed to connect');
+      }
     } catch (err) {
-      setFormError('Failed to connect. Please check your credentials.');
+      setError(err instanceof Error ? err.message : 'Failed to connect. Please check your credentials.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -36,7 +48,7 @@ export function LoginPage() {
           <div className="bg-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
             <Home className="h-8 w-8 text-blue-600" />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">Home Assistant Dashboard</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">Home Assistant</h1>
           <p className="text-blue-100">Connect to your Home Assistant instance</p>
         </div>
 
@@ -51,12 +63,12 @@ export function LoginPage() {
                 id="url"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                placeholder="homeassistant.local:8123"
+                placeholder="http://localhost:8123"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                disabled={isConnecting}
+                disabled={isLoading}
               />
               <p className="mt-2 text-sm text-gray-500">
-                Example: homeassistant.local:8123 or 192.168.1.100:8123
+                Default: http://localhost:8123
               </p>
             </div>
 
@@ -75,7 +87,7 @@ export function LoginPage() {
                   onChange={(e) => setToken(e.target.value)}
                   placeholder="Enter your access token"
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                  disabled={isConnecting}
+                  disabled={isLoading}
                 />
               </div>
               <p className="mt-2 text-sm text-gray-500">
@@ -83,21 +95,21 @@ export function LoginPage() {
               </p>
             </div>
 
-            {(error || formError) && (
+            {error && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start space-x-3">
                 <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
                 <div className="text-sm text-red-800">
-                  {formError || error}
+                  {error}
                 </div>
               </div>
             )}
 
             <button
               type="submit"
-              disabled={isConnecting}
+              disabled={isLoading}
               className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
             >
-              {isConnecting ? (
+              {isLoading ? (
                 <>
                   <Loader2 className="h-5 w-5 animate-spin" />
                   <span>Connecting...</span>
@@ -120,7 +132,7 @@ export function LoginPage() {
         </div>
 
         <div className="text-center mt-6 text-blue-100 text-sm">
-          <p>Your credentials are stored locally in your browser</p>
+          <p>Your token is stored securely in the backend database</p>
         </div>
       </div>
     </div>

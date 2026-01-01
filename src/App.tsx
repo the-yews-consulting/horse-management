@@ -5,21 +5,21 @@ import { Header } from './components/Header';
 import { Loader2 } from 'lucide-react';
 
 function AppContent() {
-  const { isConnected, isConnecting } = useHomeAssistant();
+  const { hasToken, isLoading, refreshEntities } = useHomeAssistant();
 
-  if (isConnecting) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-12 w-12 text-blue-600 animate-spin mx-auto mb-4" />
-          <p className="text-gray-600 font-medium">Connecting to Home Assistant...</p>
+          <p className="text-gray-600 font-medium">Loading...</p>
         </div>
       </div>
     );
   }
 
-  if (!isConnected) {
-    return <LoginPage />;
+  if (!hasToken) {
+    return <LoginPage onLoginSuccess={refreshEntities} />;
   }
 
   return (
