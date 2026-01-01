@@ -4,6 +4,7 @@ import { EntityCard } from '../components/EntityCard';
 import { SensorTable } from '../components/SensorTable';
 import { Alerts } from '../components/Alerts';
 import { Automations } from '../components/Automations';
+import { Settings } from '../components/Settings';
 import { getEntityDomain, filterSensors } from '../utils/entityHelpers';
 import {
   Home,
@@ -18,9 +19,10 @@ import {
   Grid3x3,
   Bell,
   Zap,
+  Settings as SettingsIcon,
 } from 'lucide-react';
 
-type ViewMode = 'cards' | 'sensors' | 'alerts' | 'automations';
+type ViewMode = 'cards' | 'sensors' | 'alerts' | 'automations' | 'settings';
 
 export function Dashboard() {
   const { entities, refreshEntities } = useHomeAssistant();
@@ -155,6 +157,17 @@ export function Dashboard() {
               <Zap className="h-4 w-4" />
               <span>Automations</span>
             </button>
+            <button
+              onClick={() => setViewMode('settings')}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition ${
+                viewMode === 'settings'
+                  ? 'bg-gray-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <SettingsIcon className="h-4 w-4" />
+              <span>Settings</span>
+            </button>
           </div>
 
           {(viewMode === 'cards' || viewMode === 'sensors') && (
@@ -223,7 +236,9 @@ export function Dashboard() {
         )}
       </div>
 
-      {viewMode === 'alerts' ? (
+      {viewMode === 'settings' ? (
+        <Settings />
+      ) : viewMode === 'alerts' ? (
         <Alerts entities={entityList.map(e => e.entity_id)} />
       ) : viewMode === 'automations' ? (
         <Automations />
