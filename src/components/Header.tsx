@@ -12,10 +12,6 @@ export function Header() {
             <div className="bg-blue-600 w-10 h-10 rounded-lg flex items-center justify-center">
               <Home className="h-6 w-6 text-white" />
             </div>
-            <div>
-              <h1 className="text-lg font-bold text-gray-900">Home Assistant</h1>
-              <p className="text-xs text-gray-500">Dashboard</p>
-            </div>
           </div>
 
           <div className="flex items-center space-x-4">

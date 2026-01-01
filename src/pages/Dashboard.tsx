@@ -68,13 +68,6 @@ export function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
-        <p className="text-gray-600">
-          {entityList.length} entities connected
-        </p>
-      </div>
-
       <div className="bg-white rounded-xl shadow-sm p-4">
         <div className="relative mb-4">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
