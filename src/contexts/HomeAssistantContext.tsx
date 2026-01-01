@@ -122,7 +122,11 @@ export function HomeAssistantProvider({ children }: HomeAssistantProviderProps) 
     const savedToken = localStorage.getItem('ha_token');
 
     if (savedUrl && savedToken) {
-      connect({ url: savedUrl, token: savedToken });
+      connect({ url: savedUrl, token: savedToken }).catch(() => {
+        // Clear invalid saved credentials
+        localStorage.removeItem('ha_url');
+        localStorage.removeItem('ha_token');
+      });
     }
 
     return () => {
