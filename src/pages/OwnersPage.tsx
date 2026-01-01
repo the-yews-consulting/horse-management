@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Plus, Edit, Trash2, Mail, Phone } from 'lucide-react';
 import { getOwners, createOwner, updateOwner, deleteOwner, Owner } from '../services/api';
 import { Modal } from '../components/Modal';
+import { QuickNav } from '../components/QuickNav';
 
 export function OwnersPage() {
   const [owners, setOwners] = useState<Owner[]>([]);
@@ -99,6 +100,7 @@ export function OwnersPage() {
 
   return (
     <div className="space-y-6">
+      <QuickNav />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Owners</h1>

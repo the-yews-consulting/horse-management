@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import { getStalls, createStall, updateStall, deleteStall, Stall } from '../services/api';
 import { Modal } from '../components/Modal';
+import { QuickNav } from '../components/QuickNav';
 
 export function StallsPage() {
   const [stalls, setStalls] = useState<Stall[]>([]);
@@ -109,6 +110,7 @@ export function StallsPage() {
 
   return (
     <div className="space-y-6">
+      <QuickNav />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Stalls</h1>

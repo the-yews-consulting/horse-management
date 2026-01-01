@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import { getHorses, createHorse, updateHorse, deleteHorse, getOwners, Horse, Owner } from '../services/api';
 import { Modal } from '../components/Modal';
+import { QuickNav } from '../components/QuickNav';
 
 export function HorsesPage() {
   const [horses, setHorses] = useState<Horse[]>([]);
@@ -90,6 +91,7 @@ export function HorsesPage() {
 
   return (
     <div className="space-y-6">
+      <QuickNav />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Horses</h1>
