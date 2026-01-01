@@ -50,3 +50,12 @@ export async function verifyConnection() {
     return { success: false, error: error.message };
   }
 }
+
+export async function getAutomations() {
+  try {
+    const states = await getStates();
+    return states.filter(entity => entity.entity_id.startsWith('automation.'));
+  } catch (error) {
+    throw new Error(`Failed to get automations: ${error.message}`);
+  }
+}

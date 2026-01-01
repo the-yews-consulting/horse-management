@@ -2,6 +2,8 @@ import { useState, useMemo, useEffect } from 'react';
 import { useHomeAssistant } from '../contexts/HomeAssistantContext';
 import { EntityCard } from '../components/EntityCard';
 import { SensorTable } from '../components/SensorTable';
+import { Alerts } from '../components/Alerts';
+import { Automations } from '../components/Automations';
 import { getEntityDomain, filterSensors } from '../utils/entityHelpers';
 import {
   Home,
@@ -14,9 +16,11 @@ import {
   RefreshCw,
   Table,
   Grid3x3,
+  Bell,
+  Zap,
 } from 'lucide-react';
 
-type ViewMode = 'cards' | 'sensors';
+type ViewMode = 'cards' | 'sensors' | 'alerts' | 'automations';
 
 export function Dashboard() {
   const { entities, refreshEntities } = useHomeAssistant();
@@ -97,7 +101,7 @@ export function Dashboard() {
     <div className="space-y-6">
       <div className="bg-white rounded-xl shadow-sm p-4">
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 flex-wrap">
             <button
               onClick={() => setViewMode('cards')}
               className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition ${
@@ -129,16 +133,40 @@ export function Dashboard() {
                 {sensors.length}
               </span>
             </button>
+            <button
+              onClick={() => setViewMode('alerts')}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition ${
+                viewMode === 'alerts'
+                  ? 'bg-orange-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <Bell className="h-4 w-4" />
+              <span>Alerts</span>
+            </button>
+            <button
+              onClick={() => setViewMode('automations')}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition ${
+                viewMode === 'automations'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <Zap className="h-4 w-4" />
+              <span>Automations</span>
+            </button>
           </div>
 
-          <button
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition disabled:opacity-50"
-          >
-            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            <span>Refresh</span>
-          </button>
+          {(viewMode === 'cards' || viewMode === 'sensors') && (
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition disabled:opacity-50"
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span>Refresh</span>
+            </button>
+          )}
         </div>
 
         {viewMode === 'cards' && (
@@ -188,12 +216,18 @@ export function Dashboard() {
           </>
         )}
 
-        <div className="mt-4 text-xs text-gray-500">
-          Last updated: {lastRefresh.toLocaleTimeString()} (real-time updates via WebSocket)
-        </div>
+        {(viewMode === 'cards' || viewMode === 'sensors') && (
+          <div className="mt-4 text-xs text-gray-500">
+            Last updated: {lastRefresh.toLocaleTimeString()} (real-time updates via WebSocket)
+          </div>
+        )}
       </div>
 
-      {viewMode === 'sensors' ? (
+      {viewMode === 'alerts' ? (
+        <Alerts entities={entityList.map(e => e.entity_id)} />
+      ) : viewMode === 'automations' ? (
+        <Automations />
+      ) : viewMode === 'sensors' ? (
         <SensorTable sensors={sensors} />
       ) : (
         <>
