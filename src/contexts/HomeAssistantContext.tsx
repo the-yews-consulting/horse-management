@@ -7,6 +7,7 @@ import {
   HassEntities,
   HassEntity,
 } from 'home-assistant-js-websocket';
+import { HOME_ASSISTANT_CONFIG, STORAGE_KEYS } from '../config/homeassistant';
 
 interface ConnectionConfig {
   url: string;
@@ -64,8 +65,8 @@ export function HomeAssistantProvider({ children }: HomeAssistantProviderProps) 
         throw new Error('Invalid URL format. Please enter a valid Home Assistant URL (e.g., http://homeassistant.local:8123)');
       }
 
-      localStorage.setItem('ha_url', formattedUrl);
-      localStorage.setItem('ha_token', config.token);
+      localStorage.setItem(STORAGE_KEYS.HA_URL, formattedUrl);
+      localStorage.setItem(STORAGE_KEYS.HA_TOKEN, config.token);
 
       const conn = await createConnection({
         auth: {
@@ -105,8 +106,8 @@ export function HomeAssistantProvider({ children }: HomeAssistantProviderProps) 
       setConnection(null);
       setIsConnected(false);
       setEntities({});
-      localStorage.removeItem('ha_url');
-      localStorage.removeItem('ha_token');
+      localStorage.removeItem(STORAGE_KEYS.HA_URL);
+      localStorage.removeItem(STORAGE_KEYS.HA_TOKEN);
     }
   };
 
@@ -118,14 +119,18 @@ export function HomeAssistantProvider({ children }: HomeAssistantProviderProps) 
   };
 
   useEffect(() => {
-    const savedUrl = localStorage.getItem('ha_url');
-    const savedToken = localStorage.getItem('ha_token');
+    const savedUrl = localStorage.getItem(STORAGE_KEYS.HA_URL);
+    const savedToken = localStorage.getItem(STORAGE_KEYS.HA_TOKEN);
 
-    if (savedUrl && savedToken) {
-      connect({ url: savedUrl, token: savedToken }).catch(() => {
+    // Try localStorage first, then fall back to config file
+    const urlToUse = savedUrl || HOME_ASSISTANT_CONFIG.url;
+    const tokenToUse = savedToken || HOME_ASSISTANT_CONFIG.token;
+
+    if (urlToUse && tokenToUse) {
+      connect({ url: urlToUse, token: tokenToUse }).catch(() => {
         // Clear invalid saved credentials
-        localStorage.removeItem('ha_url');
-        localStorage.removeItem('ha_token');
+        localStorage.removeItem(STORAGE_KEYS.HA_URL);
+        localStorage.removeItem(STORAGE_KEYS.HA_TOKEN);
       });
     }
 
