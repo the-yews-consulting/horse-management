@@ -257,6 +257,66 @@ const initPromise = new Promise((resolve, reject) => {
       }
     });
 
+    db.run(`ALTER TABLE horses ADD COLUMN sire TEXT`, (err) => {
+      if (err && !err.message.includes('duplicate column')) {
+        console.error('Error adding sire column:', err);
+      }
+    });
+
+    db.run(`ALTER TABLE horses ADD COLUMN dam TEXT`, (err) => {
+      if (err && !err.message.includes('duplicate column')) {
+        console.error('Error adding dam column:', err);
+      }
+    });
+
+    db.run(`ALTER TABLE horses ADD COLUMN bloodline_info TEXT`, (err) => {
+      if (err && !err.message.includes('duplicate column')) {
+        console.error('Error adding bloodline_info column:', err);
+      }
+    });
+
+    db.run(`ALTER TABLE horses ADD COLUMN breeding_status TEXT`, (err) => {
+      if (err && !err.message.includes('duplicate column')) {
+        console.error('Error adding breeding_status column:', err);
+      }
+    });
+
+    db.run(`ALTER TABLE horses ADD COLUMN breeding_notes TEXT`, (err) => {
+      if (err && !err.message.includes('duplicate column')) {
+        console.error('Error adding breeding_notes column:', err);
+      }
+    });
+
+    db.run(`ALTER TABLE horses ADD COLUMN inquiry_notes TEXT`, (err) => {
+      if (err && !err.message.includes('duplicate column')) {
+        console.error('Error adding inquiry_notes column:', err);
+      }
+    });
+
+    db.run(`ALTER TABLE horses ADD COLUMN competition_record TEXT`, (err) => {
+      if (err && !err.message.includes('duplicate column')) {
+        console.error('Error adding competition_record column:', err);
+      }
+    });
+
+    db.run(`ALTER TABLE horses ADD COLUMN training_notes TEXT`, (err) => {
+      if (err && !err.message.includes('duplicate column')) {
+        console.error('Error adding training_notes column:', err);
+      }
+    });
+
+    db.run(`ALTER TABLE horses ADD COLUMN video_urls TEXT`, (err) => {
+      if (err && !err.message.includes('duplicate column')) {
+        console.error('Error adding video_urls column:', err);
+      }
+    });
+
+    db.run(`ALTER TABLE horses ADD COLUMN related_links TEXT`, (err) => {
+      if (err && !err.message.includes('duplicate column')) {
+        console.error('Error adding related_links column:', err);
+      }
+    });
+
     // Create boarding assignments table
     db.run(`
       CREATE TABLE IF NOT EXISTS boarding_assignments (
@@ -700,12 +760,17 @@ export function createHorse(horse) {
     db.run(
       `INSERT INTO horses (id, name, breed, color, age, date_of_birth, gender, owner_id, vet_id, farrier_id,
        microchip_number, passport_number, medical_notes, dietary_requirements, behavioral_notes, photo_url, status,
-       colour, height, clipped, fei_id, pet_name, rfid, rug_name)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       colour, height, clipped, fei_id, pet_name, rfid, rug_name,
+       sire, dam, bloodline_info, breeding_status, breeding_notes, inquiry_notes,
+       competition_record, training_notes, video_urls, related_links)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+               ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [id, horse.name, horse.breed, horse.color, horse.age, horse.date_of_birth, horse.gender, horse.owner_id,
        horse.vet_id, horse.farrier_id, horse.microchip_number, horse.passport_number, horse.medical_notes,
        horse.dietary_requirements, horse.behavioral_notes, horse.photo_url, horse.status || 'active',
-       horse.colour, horse.height, horse.clipped ? 1 : 0, horse.fei_id, horse.pet_name, horse.rfid, horse.rug_name],
+       horse.colour, horse.height, horse.clipped ? 1 : 0, horse.fei_id, horse.pet_name, horse.rfid, horse.rug_name,
+       horse.sire, horse.dam, horse.bloodline_info, horse.breeding_status, horse.breeding_notes, horse.inquiry_notes,
+       horse.competition_record, horse.training_notes, horse.video_urls, horse.related_links],
       function (err) {
         if (err) {
           reject(err);
@@ -770,12 +835,16 @@ export function updateHorse(id, horse) {
        vet_id = ?, farrier_id = ?, microchip_number = ?, passport_number = ?, medical_notes = ?,
        dietary_requirements = ?, behavioral_notes = ?, photo_url = ?, status = ?,
        colour = ?, height = ?, clipped = ?, fei_id = ?, pet_name = ?, rfid = ?, rug_name = ?,
+       sire = ?, dam = ?, bloodline_info = ?, breeding_status = ?, breeding_notes = ?, inquiry_notes = ?,
+       competition_record = ?, training_notes = ?, video_urls = ?, related_links = ?,
        updated_at = CURRENT_TIMESTAMP
        WHERE id = ?`,
       [horse.name, horse.breed, horse.color, horse.age, horse.date_of_birth, horse.gender, horse.owner_id,
        horse.vet_id, horse.farrier_id, horse.microchip_number, horse.passport_number, horse.medical_notes,
        horse.dietary_requirements, horse.behavioral_notes, horse.photo_url, horse.status,
-       horse.colour, horse.height, horse.clipped ? 1 : 0, horse.fei_id, horse.pet_name, horse.rfid, horse.rug_name, id],
+       horse.colour, horse.height, horse.clipped ? 1 : 0, horse.fei_id, horse.pet_name, horse.rfid, horse.rug_name,
+       horse.sire, horse.dam, horse.bloodline_info, horse.breeding_status, horse.breeding_notes, horse.inquiry_notes,
+       horse.competition_record, horse.training_notes, horse.video_urls, horse.related_links, id],
       function (err) {
         if (err) {
           reject(err);

@@ -114,6 +114,16 @@ export interface Horse {
   pet_name?: string;
   rfid?: string;
   rug_name?: string;
+  sire?: string;
+  dam?: string;
+  bloodline_info?: string;
+  breeding_status?: string;
+  breeding_notes?: string;
+  inquiry_notes?: string;
+  competition_record?: string;
+  training_notes?: string;
+  video_urls?: string;
+  related_links?: string;
   owner_first_name?: string;
   owner_last_name?: string;
   vet_name?: string;

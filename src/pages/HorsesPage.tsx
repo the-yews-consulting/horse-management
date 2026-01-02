@@ -10,6 +10,7 @@ export function HorsesPage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingHorse, setEditingHorse] = useState<Horse | null>(null);
+  const [activeTab, setActiveTab] = useState('basic');
   const [formData, setFormData] = useState<Partial<Horse>>({
     name: '',
     breed: '',
@@ -25,6 +26,16 @@ export function HorsesPage() {
     pet_name: '',
     rfid: '',
     rug_name: '',
+    sire: '',
+    dam: '',
+    bloodline_info: '',
+    breeding_status: '',
+    breeding_notes: '',
+    inquiry_notes: '',
+    competition_record: '',
+    training_notes: '',
+    video_urls: '',
+    related_links: '',
   });
 
   useEffect(() => {
@@ -77,6 +88,16 @@ export function HorsesPage() {
         pet_name: '',
         rfid: '',
         rug_name: '',
+        sire: '',
+        dam: '',
+        bloodline_info: '',
+        breeding_status: '',
+        breeding_notes: '',
+        inquiry_notes: '',
+        competition_record: '',
+        training_notes: '',
+        video_urls: '',
+        related_links: '',
       });
       loadHorses();
     } catch (error) {
@@ -87,6 +108,7 @@ export function HorsesPage() {
 
   const handleEdit = (horse: Horse) => {
     setEditingHorse(horse);
+    setActiveTab('basic');
     setFormData(horse);
     setIsModalOpen(true);
   };
@@ -104,6 +126,7 @@ export function HorsesPage() {
 
   const handleAddNew = () => {
     setEditingHorse(null);
+    setActiveTab('basic');
     setFormData({
       name: '',
       breed: '',
@@ -119,6 +142,16 @@ export function HorsesPage() {
       pet_name: '',
       rfid: '',
       rug_name: '',
+      sire: '',
+      dam: '',
+      bloodline_info: '',
+      breeding_status: '',
+      breeding_notes: '',
+      inquiry_notes: '',
+      competition_record: '',
+      training_notes: '',
+      video_urls: '',
+      related_links: '',
     });
     setIsModalOpen(true);
   };
@@ -230,9 +263,39 @@ export function HorsesPage() {
         onClose={() => setIsModalOpen(false)}
         title={editingHorse ? 'Edit Horse' : 'Add New Horse'}
       >
-        <form onSubmit={handleSubmit} className="space-y-6 max-h-[70vh] overflow-y-auto pr-2">
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-gray-900 border-b pb-2">Basic Information</h3>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex space-x-4 overflow-x-auto">
+              {[
+                { id: 'basic', label: 'Basic Info' },
+                { id: 'diet', label: 'Diet' },
+                { id: 'ownership', label: 'Ownership' },
+                { id: 'pedigree', label: 'Pedigree' },
+                { id: 'breeding', label: 'Breeding' },
+                { id: 'inquiry', label: 'Inquiry' },
+                { id: 'performance', label: 'Performance' },
+                { id: 'media', label: 'Media' },
+                { id: 'links', label: 'Links' },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm transition-colors ${
+                    activeTab === tab.id
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
+          </div>
+
+          <div className="max-h-[60vh] overflow-y-auto pr-2 space-y-4">
+            {activeTab === 'basic' && (
+              <div className="space-y-4">
 
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -352,87 +415,271 @@ export function HorsesPage() {
                 </label>
               </div>
             </div>
+
+                <h3 className="text-sm font-semibold text-gray-900 border-b pb-2 mt-6">Identification</h3>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      FEI ID
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.fei_id || ''}
+                      onChange={(e) => setFormData({ ...formData, fei_id: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Passport No.
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.passport_number || ''}
+                      onChange={(e) => setFormData({ ...formData, passport_number: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      RFID
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.rfid || ''}
+                      onChange={(e) => setFormData({ ...formData, rfid: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Rug Name
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.rug_name || ''}
+                      onChange={(e) => setFormData({ ...formData, rug_name: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'diet' && (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Dietary Requirements
+                  </label>
+                  <textarea
+                    value={formData.dietary_requirements || ''}
+                    onChange={(e) => setFormData({ ...formData, dietary_requirements: e.target.value })}
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Special dietary needs, allergies, supplements..."
+                  />
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'ownership' && (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Owner
+                  </label>
+                  <select
+                    value={formData.owner_id || ''}
+                    onChange={(e) => setFormData({ ...formData, owner_id: e.target.value || undefined })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">Select owner</option>
+                    {owners.map((owner) => (
+                      <option key={owner.id} value={owner.id}>
+                        {owner.first_name} {owner.last_name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'pedigree' && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Sire
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.sire || ''}
+                      onChange={(e) => setFormData({ ...formData, sire: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Father's name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Dam
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.dam || ''}
+                      onChange={(e) => setFormData({ ...formData, dam: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Mother's name"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Bloodline Information
+                  </label>
+                  <textarea
+                    value={formData.bloodline_info || ''}
+                    onChange={(e) => setFormData({ ...formData, bloodline_info: e.target.value })}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Additional pedigree details..."
+                  />
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'breeding' && (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Breeding Status
+                  </label>
+                  <select
+                    value={formData.breeding_status || ''}
+                    onChange={(e) => setFormData({ ...formData, breeding_status: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">Select status</option>
+                    <option value="available">Available for Breeding</option>
+                    <option value="not_available">Not Available</option>
+                    <option value="retired">Retired</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Breeding Notes
+                  </label>
+                  <textarea
+                    value={formData.breeding_notes || ''}
+                    onChange={(e) => setFormData({ ...formData, breeding_notes: e.target.value })}
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Breeding history, offspring details..."
+                  />
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'inquiry' && (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Inquiry Notes
+                  </label>
+                  <textarea
+                    value={formData.inquiry_notes || ''}
+                    onChange={(e) => setFormData({ ...formData, inquiry_notes: e.target.value })}
+                    rows={6}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Inquiries, expressions of interest, sale discussions..."
+                  />
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'performance' && (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Competition Record
+                  </label>
+                  <textarea
+                    value={formData.competition_record || ''}
+                    onChange={(e) => setFormData({ ...formData, competition_record: e.target.value })}
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Competition results, placings, achievements..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Training Notes
+                  </label>
+                  <textarea
+                    value={formData.training_notes || ''}
+                    onChange={(e) => setFormData({ ...formData, training_notes: e.target.value })}
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Training progress, discipline, skill level..."
+                  />
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'media' && (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Photo URL
+                  </label>
+                  <input
+                    type="url"
+                    value={formData.photo_url || ''}
+                    onChange={(e) => setFormData({ ...formData, photo_url: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="https://..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Video URLs
+                  </label>
+                  <textarea
+                    value={formData.video_urls || ''}
+                    onChange={(e) => setFormData({ ...formData, video_urls: e.target.value })}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="One URL per line..."
+                  />
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'links' && (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Related Links
+                  </label>
+                  <textarea
+                    value={formData.related_links || ''}
+                    onChange={(e) => setFormData({ ...formData, related_links: e.target.value })}
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="One link per line - registration documents, health records, etc..."
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-gray-900 border-b pb-2">Identification</h3>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  FEI ID
-                </label>
-                <input
-                  type="text"
-                  value={formData.fei_id || ''}
-                  onChange={(e) => setFormData({ ...formData, fei_id: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Passport No.
-                </label>
-                <input
-                  type="text"
-                  value={formData.passport_number || ''}
-                  onChange={(e) => setFormData({ ...formData, passport_number: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  RFID
-                </label>
-                <input
-                  type="text"
-                  value={formData.rfid || ''}
-                  onChange={(e) => setFormData({ ...formData, rfid: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Rug Name
-                </label>
-                <input
-                  type="text"
-                  value={formData.rug_name || ''}
-                  onChange={(e) => setFormData({ ...formData, rug_name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-gray-900 border-b pb-2">Ownership</h3>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Owner
-              </label>
-              <select
-                value={formData.owner_id || ''}
-                onChange={(e) => setFormData({ ...formData, owner_id: e.target.value || undefined })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">Select owner</option>
-                {owners.map((owner) => (
-                  <option key={owner.id} value={owner.id}>
-                    {owner.first_name} {owner.last_name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="flex gap-3 pt-4 border-t sticky bottom-0 bg-white">
+          <div className="flex gap-3 pt-4 border-t bg-white">
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
