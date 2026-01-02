@@ -144,6 +144,34 @@ export interface Owner {
   updated_at?: string;
 }
 
+export interface Vet {
+  id?: string;
+  name: string;
+  clinic_name?: string;
+  email?: string;
+  phone: string;
+  address?: string;
+  emergency_phone?: string;
+  banking_details?: string;
+  specialties?: string;
+  notes?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface Farrier {
+  id?: string;
+  name: string;
+  email?: string;
+  phone: string;
+  address?: string;
+  banking_details?: string;
+  service_areas?: string;
+  notes?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export async function getHorses(): Promise<Horse[]> {
   const response = await fetch(`${API_BASE_URL}/horses`);
   if (!response.ok) {
@@ -325,6 +353,130 @@ export async function deleteOwner(id: string): Promise<{ success: boolean }> {
 
   if (!response.ok) {
     throw new Error('Failed to delete owner');
+  }
+
+  return await response.json();
+}
+
+export async function getVets(): Promise<Vet[]> {
+  const response = await fetch(`${API_BASE_URL}/vets`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch vets');
+  }
+  return await response.json();
+}
+
+export async function getVet(id: string): Promise<Vet> {
+  const response = await fetch(`${API_BASE_URL}/vets/${id}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch vet');
+  }
+  return await response.json();
+}
+
+export async function createVet(vet: Vet): Promise<Vet> {
+  const response = await fetch(`${API_BASE_URL}/vets`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(vet),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to create vet');
+  }
+
+  return await response.json();
+}
+
+export async function updateVet(id: string, vet: Vet): Promise<Vet> {
+  const response = await fetch(`${API_BASE_URL}/vets/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(vet),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to update vet');
+  }
+
+  return await response.json();
+}
+
+export async function deleteVet(id: string): Promise<{ success: boolean }> {
+  const response = await fetch(`${API_BASE_URL}/vets/${id}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to delete vet');
+  }
+
+  return await response.json();
+}
+
+export async function getFarriers(): Promise<Farrier[]> {
+  const response = await fetch(`${API_BASE_URL}/farriers`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch farriers');
+  }
+  return await response.json();
+}
+
+export async function getFarrier(id: string): Promise<Farrier> {
+  const response = await fetch(`${API_BASE_URL}/farriers/${id}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch farrier');
+  }
+  return await response.json();
+}
+
+export async function createFarrier(farrier: Farrier): Promise<Farrier> {
+  const response = await fetch(`${API_BASE_URL}/farriers`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(farrier),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to create farrier');
+  }
+
+  return await response.json();
+}
+
+export async function updateFarrier(id: string, farrier: Farrier): Promise<Farrier> {
+  const response = await fetch(`${API_BASE_URL}/farriers/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(farrier),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to update farrier');
+  }
+
+  return await response.json();
+}
+
+export async function deleteFarrier(id: string): Promise<{ success: boolean }> {
+  const response = await fetch(`${API_BASE_URL}/farriers/${id}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to delete farrier');
   }
 
   return await response.json();
