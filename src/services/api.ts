@@ -481,3 +481,83 @@ export async function deleteFarrier(id: string): Promise<{ success: boolean }> {
 
   return await response.json();
 }
+
+export interface Activity {
+  id?: string;
+  title: string;
+  activity_type: 'feeding' | 'training' | 'vet_visit' | 'farrier_visit' | 'grooming' | 'exercise' | 'medication' | 'custom';
+  horse_id?: string;
+  stall_id?: string;
+  assigned_to?: string;
+  scheduled_start: string;
+  scheduled_end?: string;
+  status?: 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
+  notes?: string;
+  recurrence_rule?: string;
+  horse_name?: string;
+  stall_name?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export async function getActivities(): Promise<Activity[]> {
+  const response = await fetch(`${API_BASE_URL}/activities`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch activities');
+  }
+  return await response.json();
+}
+
+export async function getActivity(id: string): Promise<Activity> {
+  const response = await fetch(`${API_BASE_URL}/activities/${id}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch activity');
+  }
+  return await response.json();
+}
+
+export async function createActivity(activity: Activity): Promise<Activity> {
+  const response = await fetch(`${API_BASE_URL}/activities`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(activity),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to create activity');
+  }
+
+  return await response.json();
+}
+
+export async function updateActivity(id: string, activity: Activity): Promise<Activity> {
+  const response = await fetch(`${API_BASE_URL}/activities/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(activity),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to update activity');
+  }
+
+  return await response.json();
+}
+
+export async function deleteActivity(id: string): Promise<{ success: boolean }> {
+  const response = await fetch(`${API_BASE_URL}/activities/${id}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to delete activity');
+  }
+
+  return await response.json();
+}
