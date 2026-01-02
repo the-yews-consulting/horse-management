@@ -96,7 +96,7 @@ export interface Horse {
   color?: string;
   age?: number;
   date_of_birth?: string;
-  gender?: 'mare' | 'stallion' | 'gelding';
+  gender?: 'mare' | 'stallion' | 'gelding' | 'colt' | 'filly';
   owner_id?: string;
   vet_id?: string;
   farrier_id?: string;
@@ -107,6 +107,13 @@ export interface Horse {
   behavioral_notes?: string;
   photo_url?: string;
   status?: 'active' | 'inactive' | 'sold' | 'deceased';
+  colour?: 'Brown' | 'Bay' | 'Chesnut' | 'Grey' | 'Black';
+  height?: number;
+  clipped?: boolean;
+  fei_id?: string;
+  pet_name?: string;
+  rfid?: string;
+  rug_name?: string;
   owner_first_name?: string;
   owner_last_name?: string;
   vet_name?: string;

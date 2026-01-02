@@ -184,7 +184,7 @@ const initPromise = new Promise((resolve, reject) => {
         color TEXT,
         age INTEGER,
         date_of_birth DATE,
-        gender TEXT CHECK (gender IN ('mare', 'stallion', 'gelding')),
+        gender TEXT CHECK (gender IN ('mare', 'stallion', 'gelding', 'colt', 'filly')),
         owner_id TEXT,
         vet_id TEXT,
         farrier_id TEXT,
@@ -195,6 +195,13 @@ const initPromise = new Promise((resolve, reject) => {
         behavioral_notes TEXT,
         photo_url TEXT,
         status TEXT DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'sold', 'deceased')),
+        colour TEXT CHECK (colour IN ('Brown', 'Bay', 'Chesnut', 'Grey', 'Black')),
+        height REAL,
+        clipped INTEGER DEFAULT 0,
+        fei_id TEXT,
+        pet_name TEXT,
+        rfid TEXT,
+        rug_name TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (owner_id) REFERENCES owners(id) ON DELETE CASCADE,
@@ -204,6 +211,49 @@ const initPromise = new Promise((resolve, reject) => {
     `, (err) => {
       if (err) {
         console.error('Error creating horses table:', err);
+      }
+    });
+
+    // Add new columns to existing horses table if they don't exist
+    db.run(`ALTER TABLE horses ADD COLUMN colour TEXT CHECK (colour IN ('Brown', 'Bay', 'Chesnut', 'Grey', 'Black'))`, (err) => {
+      if (err && !err.message.includes('duplicate column')) {
+        console.error('Error adding colour column:', err);
+      }
+    });
+
+    db.run(`ALTER TABLE horses ADD COLUMN height REAL`, (err) => {
+      if (err && !err.message.includes('duplicate column')) {
+        console.error('Error adding height column:', err);
+      }
+    });
+
+    db.run(`ALTER TABLE horses ADD COLUMN clipped INTEGER DEFAULT 0`, (err) => {
+      if (err && !err.message.includes('duplicate column')) {
+        console.error('Error adding clipped column:', err);
+      }
+    });
+
+    db.run(`ALTER TABLE horses ADD COLUMN fei_id TEXT`, (err) => {
+      if (err && !err.message.includes('duplicate column')) {
+        console.error('Error adding fei_id column:', err);
+      }
+    });
+
+    db.run(`ALTER TABLE horses ADD COLUMN pet_name TEXT`, (err) => {
+      if (err && !err.message.includes('duplicate column')) {
+        console.error('Error adding pet_name column:', err);
+      }
+    });
+
+    db.run(`ALTER TABLE horses ADD COLUMN rfid TEXT`, (err) => {
+      if (err && !err.message.includes('duplicate column')) {
+        console.error('Error adding rfid column:', err);
+      }
+    });
+
+    db.run(`ALTER TABLE horses ADD COLUMN rug_name TEXT`, (err) => {
+      if (err && !err.message.includes('duplicate column')) {
+        console.error('Error adding rug_name column:', err);
       }
     });
 
@@ -649,11 +699,13 @@ export function createHorse(horse) {
     const id = crypto.randomUUID();
     db.run(
       `INSERT INTO horses (id, name, breed, color, age, date_of_birth, gender, owner_id, vet_id, farrier_id,
-       microchip_number, passport_number, medical_notes, dietary_requirements, behavioral_notes, photo_url, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       microchip_number, passport_number, medical_notes, dietary_requirements, behavioral_notes, photo_url, status,
+       colour, height, clipped, fei_id, pet_name, rfid, rug_name)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [id, horse.name, horse.breed, horse.color, horse.age, horse.date_of_birth, horse.gender, horse.owner_id,
        horse.vet_id, horse.farrier_id, horse.microchip_number, horse.passport_number, horse.medical_notes,
-       horse.dietary_requirements, horse.behavioral_notes, horse.photo_url, horse.status || 'active'],
+       horse.dietary_requirements, horse.behavioral_notes, horse.photo_url, horse.status || 'active',
+       horse.colour, horse.height, horse.clipped ? 1 : 0, horse.fei_id, horse.pet_name, horse.rfid, horse.rug_name],
       function (err) {
         if (err) {
           reject(err);
@@ -679,7 +731,10 @@ export function getAllHorses() {
       if (err) {
         reject(err);
       } else {
-        resolve(rows);
+        resolve(rows.map(row => ({
+          ...row,
+          clipped: row.clipped === 1
+        })));
       }
     });
   });
@@ -699,6 +754,9 @@ export function getHorseById(id) {
       if (err) {
         reject(err);
       } else {
+        if (row) {
+          row.clipped = row.clipped === 1;
+        }
         resolve(row);
       }
     });
@@ -710,11 +768,14 @@ export function updateHorse(id, horse) {
     db.run(
       `UPDATE horses SET name = ?, breed = ?, color = ?, age = ?, date_of_birth = ?, gender = ?, owner_id = ?,
        vet_id = ?, farrier_id = ?, microchip_number = ?, passport_number = ?, medical_notes = ?,
-       dietary_requirements = ?, behavioral_notes = ?, photo_url = ?, status = ?, updated_at = CURRENT_TIMESTAMP
+       dietary_requirements = ?, behavioral_notes = ?, photo_url = ?, status = ?,
+       colour = ?, height = ?, clipped = ?, fei_id = ?, pet_name = ?, rfid = ?, rug_name = ?,
+       updated_at = CURRENT_TIMESTAMP
        WHERE id = ?`,
       [horse.name, horse.breed, horse.color, horse.age, horse.date_of_birth, horse.gender, horse.owner_id,
        horse.vet_id, horse.farrier_id, horse.microchip_number, horse.passport_number, horse.medical_notes,
-       horse.dietary_requirements, horse.behavioral_notes, horse.photo_url, horse.status, id],
+       horse.dietary_requirements, horse.behavioral_notes, horse.photo_url, horse.status,
+       horse.colour, horse.height, horse.clipped ? 1 : 0, horse.fei_id, horse.pet_name, horse.rfid, horse.rug_name, id],
       function (err) {
         if (err) {
           reject(err);

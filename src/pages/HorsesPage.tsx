@@ -17,6 +17,14 @@ export function HorsesPage() {
     age: undefined,
     gender: undefined,
     owner_id: undefined,
+    colour: undefined,
+    height: undefined,
+    clipped: false,
+    fei_id: '',
+    passport_number: '',
+    pet_name: '',
+    rfid: '',
+    rug_name: '',
   });
 
   useEffect(() => {
@@ -54,7 +62,22 @@ export function HorsesPage() {
       }
       setIsModalOpen(false);
       setEditingHorse(null);
-      setFormData({ name: '', breed: '', color: '', age: undefined, gender: undefined, owner_id: undefined });
+      setFormData({
+        name: '',
+        breed: '',
+        color: '',
+        age: undefined,
+        gender: undefined,
+        owner_id: undefined,
+        colour: undefined,
+        height: undefined,
+        clipped: false,
+        fei_id: '',
+        passport_number: '',
+        pet_name: '',
+        rfid: '',
+        rug_name: '',
+      });
       loadHorses();
     } catch (error) {
       console.error('Failed to save horse:', error);
@@ -81,7 +104,22 @@ export function HorsesPage() {
 
   const handleAddNew = () => {
     setEditingHorse(null);
-    setFormData({ name: '', breed: '', color: '', age: undefined, gender: undefined, owner_id: undefined });
+    setFormData({
+      name: '',
+      breed: '',
+      color: '',
+      age: undefined,
+      gender: undefined,
+      owner_id: undefined,
+      colour: undefined,
+      height: undefined,
+      clipped: false,
+      fei_id: '',
+      passport_number: '',
+      pet_name: '',
+      rfid: '',
+      rug_name: '',
+    });
     setIsModalOpen(true);
   };
 
@@ -122,10 +160,10 @@ export function HorsesPage() {
                   Breed
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Color
+                  Colour
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Age
+                  Height
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Gender
@@ -141,19 +179,22 @@ export function HorsesPage() {
             <tbody className="bg-white divide-y divide-gray-200">
               {horses.map((horse) => (
                 <tr key={horse.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {horse.name}
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">{horse.name}</div>
+                    {horse.pet_name && (
+                      <div className="text-xs text-gray-500">"{horse.pet_name}"</div>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {horse.breed || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {horse.color || '-'}
+                    {horse.colour || horse.color || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {horse.age || '-'}
+                    {horse.height ? `${horse.height}hh` : '-'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">
                     {horse.gender || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -189,95 +230,209 @@ export function HorsesPage() {
         onClose={() => setIsModalOpen(false)}
         title={editingHorse ? 'Edit Horse' : 'Add New Horse'}
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Name *
-            </label>
-            <input
-              type="text"
-              required
-              value={formData.name || ''}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+        <form onSubmit={handleSubmit} className="space-y-6 max-h-[70vh] overflow-y-auto pr-2">
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-gray-900 border-b pb-2">Basic Information</h3>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.name || ''}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Pet Name
+                </label>
+                <input
+                  type="text"
+                  value={formData.pet_name || ''}
+                  onChange={(e) => setFormData({ ...formData, pet_name: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Breed
+                </label>
+                <input
+                  type="text"
+                  value={formData.breed || ''}
+                  onChange={(e) => setFormData({ ...formData, breed: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Gender
+                </label>
+                <select
+                  value={formData.gender || ''}
+                  onChange={(e) => setFormData({ ...formData, gender: e.target.value as any })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">Select gender</option>
+                  <option value="colt">Colt</option>
+                  <option value="gelding">Gelding</option>
+                  <option value="stallion">Stallion</option>
+                  <option value="filly">Filly</option>
+                  <option value="mare">Mare</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Colour
+                </label>
+                <select
+                  value={formData.colour || ''}
+                  onChange={(e) => setFormData({ ...formData, colour: e.target.value as any })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">Select colour</option>
+                  <option value="Brown">Brown</option>
+                  <option value="Bay">Bay</option>
+                  <option value="Chesnut">Chesnut</option>
+                  <option value="Grey">Grey</option>
+                  <option value="Black">Black</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Height (hands)
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={formData.height || ''}
+                  onChange={(e) => setFormData({ ...formData, height: e.target.value ? parseFloat(e.target.value) : undefined })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="e.g., 16.2"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Age
+                </label>
+                <input
+                  type="number"
+                  value={formData.age || ''}
+                  onChange={(e) => setFormData({ ...formData, age: e.target.value ? parseInt(e.target.value) : undefined })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="flex items-center space-x-2 pt-8">
+                  <input
+                    type="checkbox"
+                    checked={formData.clipped || false}
+                    onChange={(e) => setFormData({ ...formData, clipped: e.target.checked })}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="text-sm font-medium text-gray-700">Clipped</span>
+                </label>
+              </div>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Breed
-              </label>
-              <input
-                type="text"
-                value={formData.breed || ''}
-                onChange={(e) => setFormData({ ...formData, breed: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-gray-900 border-b pb-2">Identification</h3>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  FEI ID
+                </label>
+                <input
+                  type="text"
+                  value={formData.fei_id || ''}
+                  onChange={(e) => setFormData({ ...formData, fei_id: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Passport No.
+                </label>
+                <input
+                  type="text"
+                  value={formData.passport_number || ''}
+                  onChange={(e) => setFormData({ ...formData, passport_number: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Color
-              </label>
-              <input
-                type="text"
-                value={formData.color || ''}
-                onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  RFID
+                </label>
+                <input
+                  type="text"
+                  value={formData.rfid || ''}
+                  onChange={(e) => setFormData({ ...formData, rfid: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Rug Name
+                </label>
+                <input
+                  type="text"
+                  value={formData.rug_name || ''}
+                  onChange={(e) => setFormData({ ...formData, rug_name: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Age
-              </label>
-              <input
-                type="number"
-                value={formData.age || ''}
-                onChange={(e) => setFormData({ ...formData, age: e.target.value ? parseInt(e.target.value) : undefined })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-gray-900 border-b pb-2">Ownership</h3>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Gender
+                Owner
               </label>
               <select
-                value={formData.gender || ''}
-                onChange={(e) => setFormData({ ...formData, gender: e.target.value as any })}
+                value={formData.owner_id || ''}
+                onChange={(e) => setFormData({ ...formData, owner_id: e.target.value || undefined })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="">Select gender</option>
-                <option value="mare">Mare</option>
-                <option value="stallion">Stallion</option>
-                <option value="gelding">Gelding</option>
+                <option value="">Select owner</option>
+                {owners.map((owner) => (
+                  <option key={owner.id} value={owner.id}>
+                    {owner.first_name} {owner.last_name}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Owner
-            </label>
-            <select
-              value={formData.owner_id || ''}
-              onChange={(e) => setFormData({ ...formData, owner_id: e.target.value || undefined })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="">Select owner</option>
-              {owners.map((owner) => (
-                <option key={owner.id} value={owner.id}>
-                  {owner.first_name} {owner.last_name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-3 pt-4 border-t sticky bottom-0 bg-white">
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
