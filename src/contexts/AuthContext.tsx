@@ -29,14 +29,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.error('Token verification failed:', error);
           removeToken();
         }
-      } else {
-        setUser({
-          id: 'temp-user',
-          email: 'admin@stable.com',
-          full_name: 'Admin User',
-          role: 'admin',
-        });
-        setToken('temp-token');
       }
       setLoading(false);
     };
