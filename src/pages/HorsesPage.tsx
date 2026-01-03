@@ -83,10 +83,15 @@ export function HorsesPage() {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
-      const data = await response.json();
-      setBreeds(data);
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setBreeds(data);
+        }
+      }
     } catch (error) {
       console.error('Failed to load breeds:', error);
+      setBreeds([]);
     }
   };
 
@@ -97,10 +102,15 @@ export function HorsesPage() {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
-      const data = await response.json();
-      setColours(data);
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setColours(data);
+        }
+      }
     } catch (error) {
       console.error('Failed to load colours:', error);
+      setColours([]);
     }
   };
 
@@ -111,10 +121,15 @@ export function HorsesPage() {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
-      const data = await response.json();
-      setGenders(data);
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setGenders(data);
+        }
+      }
     } catch (error) {
       console.error('Failed to load genders:', error);
+      setGenders([]);
     }
   };
 
