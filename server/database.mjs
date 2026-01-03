@@ -363,10 +363,10 @@ const initPromise = new Promise((resolve, reject) => {
           }
         });
 
-        db.run(`DELETE FROM horse_colours`, (err) => {
+        db.get(`SELECT COUNT(*) as count FROM horse_colours`, [], (err, row) => {
           if (err) {
-            console.error('Error clearing horse_colours:', err);
-          } else {
+            console.error('Error checking horse_colours:', err);
+          } else if (row.count === 0) {
             db.run(`
               INSERT INTO horse_colours (id, abbreviation, name, description, is_default) VALUES
               ('${crypto.randomUUID()}', 'Bay', 'Bay', 'Bay', 0),
@@ -384,7 +384,11 @@ const initPromise = new Promise((resolve, reject) => {
               ('${crypto.randomUUID()}', 'GrCh', 'Grey/Chesnut', 'Grey/Chesnut', 0),
               ('${crypto.randomUUID()}', 'GrRn', 'Grey/Roan', 'Grey/Roan', 0),
               ('${crypto.randomUUID()}', 'Oth', 'Other', 'Other', 0)
-            `);
+            `, (err) => {
+              if (err) {
+                console.error('Error populating horse_colours:', err);
+              }
+            });
           }
         });
       }

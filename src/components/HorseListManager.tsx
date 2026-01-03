@@ -35,10 +35,24 @@ export function HorseListManager({ listType, title }: HorseListManagerProps) {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
+
+      if (!response.ok) {
+        console.error('Failed to load items:', response.statusText);
+        setItems([]);
+        return;
+      }
+
       const data = await response.json();
-      setItems(data);
+
+      if (Array.isArray(data)) {
+        setItems(data);
+      } else {
+        console.error('Invalid data format:', data);
+        setItems([]);
+      }
     } catch (error) {
       console.error('Failed to load items:', error);
+      setItems([]);
     } finally {
       setLoading(false);
     }
