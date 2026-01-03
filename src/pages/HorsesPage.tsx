@@ -329,12 +329,18 @@ export function HorsesPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Breed
                 </label>
-                <input
-                  type="text"
+                <select
                   value={formData.breed || ''}
                   onChange={(e) => setFormData({ ...formData, breed: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+                >
+                  <option value="">Select breed</option>
+                  <option value="Pony">Pony</option>
+                  <option value="Purebred Arabian">Purebred Arabian</option>
+                  <option value="Quarter Horse">Quarter Horse</option>
+                  <option value="Standardbred">Standardbred</option>
+                  <option value="Thoroughbred">Thoroughbred</option>
+                </select>
               </div>
 
               <div>
