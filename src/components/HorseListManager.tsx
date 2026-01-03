@@ -6,6 +6,7 @@ interface ListItem {
   id: string;
   name: string;
   abbreviation: string;
+  description?: string;
   isDefault: boolean;
 }
 
@@ -19,7 +20,9 @@ export function HorseListManager({ listType, title }: HorseListManagerProps) {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ListItem | null>(null);
-  const [formData, setFormData] = useState({ name: '', abbreviation: '', isDefault: false });
+  const [formData, setFormData] = useState({ name: '', abbreviation: '', description: '', isDefault: false });
+
+  const isColourList = listType === 'colours';
 
   useEffect(() => {
     loadItems();
@@ -62,7 +65,7 @@ export function HorseListManager({ listType, title }: HorseListManagerProps) {
       if (response.ok) {
         setIsModalOpen(false);
         setEditingItem(null);
-        setFormData({ name: '', abbreviation: '', isDefault: false });
+        setFormData({ name: '', abbreviation: '', description: '', isDefault: false });
         loadItems();
       } else {
         alert('Failed to save item');
@@ -78,6 +81,7 @@ export function HorseListManager({ listType, title }: HorseListManagerProps) {
     setFormData({
       name: item.name,
       abbreviation: item.abbreviation,
+      description: item.description || item.name,
       isDefault: item.isDefault
     });
     setIsModalOpen(true);
@@ -107,7 +111,7 @@ export function HorseListManager({ listType, title }: HorseListManagerProps) {
 
   const handleAddNew = () => {
     setEditingItem(null);
-    setFormData({ name: '', abbreviation: '', isDefault: false });
+    setFormData({ name: '', abbreviation: '', description: '', isDefault: false });
     setIsModalOpen(true);
   };
 
@@ -133,14 +137,16 @@ export function HorseListManager({ listType, title }: HorseListManagerProps) {
           <thead className="bg-gray-100">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Name
+                {isColourList ? 'Abbreviation' : 'Name'}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Abbreviation
+                {isColourList ? 'Description ↑' : 'Abbreviation'}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Default
-              </th>
+              {!isColourList && (
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Default
+                </th>
+              )}
               <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Edit
               </th>
@@ -154,19 +160,21 @@ export function HorseListManager({ listType, title }: HorseListManagerProps) {
               <tr
                 key={item.id}
                 className={`
-                  ${item.isDefault ? 'bg-yellow-50' : index % 2 === 0 ? 'bg-cyan-50' : 'bg-white'}
+                  ${item.isDefault ? 'bg-yellow-200' : index % 2 === 0 ? 'bg-cyan-50' : 'bg-white'}
                   hover:bg-gray-50 transition-colors
                 `}
               >
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {item.name}
+                  {isColourList ? item.abbreviation : item.name}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {item.abbreviation}
+                  {isColourList ? (item.description || item.name) : item.abbreviation}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {item.isDefault ? 'Yes' : 'No'}
-                </td>
+                {!isColourList && (
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {item.isDefault ? 'Yes' : 'No'}
+                  </td>
+                )}
                 <td className="px-6 py-4 whitespace-nowrap text-center">
                   <button
                     onClick={() => handleEdit(item)}
@@ -195,18 +203,20 @@ export function HorseListManager({ listType, title }: HorseListManagerProps) {
         title={editingItem ? `Edit ${title.slice(0, -1)}` : `Add New ${title.slice(0, -1)}`}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Name *
-            </label>
-            <input
-              type="text"
-              required
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
+          {!isColourList && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Name *
+              </label>
+              <input
+                type="text"
+                required
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -220,6 +230,21 @@ export function HorseListManager({ listType, title }: HorseListManagerProps) {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
+
+          {isColourList && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Description *
+              </label>
+              <input
+                type="text"
+                required
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value, name: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          )}
 
           <div>
             <label className="flex items-center space-x-2">

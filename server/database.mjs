@@ -348,6 +348,7 @@ const initPromise = new Promise((resolve, reject) => {
         id TEXT PRIMARY KEY,
         name TEXT UNIQUE NOT NULL,
         abbreviation TEXT NOT NULL,
+        description TEXT,
         is_default INTEGER DEFAULT 0,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -356,14 +357,36 @@ const initPromise = new Promise((resolve, reject) => {
       if (err) {
         console.error('Error creating horse_colours table:', err);
       } else {
-        db.run(`
-          INSERT OR IGNORE INTO horse_colours (id, name, abbreviation, is_default) VALUES
-          ('${crypto.randomUUID()}', 'Brown', 'BR', 0),
-          ('${crypto.randomUUID()}', 'Bay', 'BAY', 1),
-          ('${crypto.randomUUID()}', 'Chesnut', 'CH', 0),
-          ('${crypto.randomUUID()}', 'Grey', 'GR', 0),
-          ('${crypto.randomUUID()}', 'Black', 'BL', 0)
-        `);
+        db.run(`ALTER TABLE horse_colours ADD COLUMN description TEXT`, (err) => {
+          if (err && !err.message.includes('duplicate column')) {
+            console.error('Error adding description column:', err);
+          }
+        });
+
+        db.run(`DELETE FROM horse_colours`, (err) => {
+          if (err) {
+            console.error('Error clearing horse_colours:', err);
+          } else {
+            db.run(`
+              INSERT INTO horse_colours (id, abbreviation, name, description, is_default) VALUES
+              ('${crypto.randomUUID()}', 'Bay', 'Bay', 'Bay', 0),
+              ('${crypto.randomUUID()}', 'Bbr', 'Bay/Brown', 'Bay/Brown', 0),
+              ('${crypto.randomUUID()}', 'Bl', 'Black', 'Black', 1),
+              ('${crypto.randomUUID()}', 'Br', 'Brown', 'Brown', 0),
+              ('${crypto.randomUUID()}', 'BrBl', 'Brown/Black', 'Brown/Black', 0),
+              ('${crypto.randomUUID()}', 'BrGr', 'Brown/Grey', 'Brown/Grey', 0),
+              ('${crypto.randomUUID()}', 'Ch', 'Chesnut', 'Chesnut', 0),
+              ('${crypto.randomUUID()}', 'Dkb', 'Dark Bay', 'Dark Bay', 0),
+              ('${crypto.randomUUID()}', 'Dkbb', 'Dark Bay/Brown', 'Dark Bay/Brown', 0),
+              ('${crypto.randomUUID()}', 'Dkbr', 'Dark Brown', 'Dark Brown', 0),
+              ('${crypto.randomUUID()}', 'Gr', 'Grey', 'Grey', 0),
+              ('${crypto.randomUUID()}', 'GrBa', 'Grey/Bay', 'Grey/Bay', 0),
+              ('${crypto.randomUUID()}', 'GrCh', 'Grey/Chesnut', 'Grey/Chesnut', 0),
+              ('${crypto.randomUUID()}', 'GrRn', 'Grey/Roan', 'Grey/Roan', 0),
+              ('${crypto.randomUUID()}', 'Oth', 'Other', 'Other', 0)
+            `);
+          }
+        });
       }
     });
 

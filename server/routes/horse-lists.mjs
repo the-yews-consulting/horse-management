@@ -23,10 +23,14 @@ function validateListType(listType) {
 router.get('/:listType', (req, res) => {
   try {
     const table = validateListType(req.params.listType);
+    const columns = table === 'horse_colours'
+      ? 'id, name, abbreviation, description, is_default as isDefault, created_at, updated_at'
+      : 'id, name, abbreviation, is_default as isDefault, created_at, updated_at';
+
     db.all(`
-      SELECT id, name, abbreviation, is_default as isDefault, created_at, updated_at
+      SELECT ${columns}
       FROM ${table}
-      ORDER BY name ASC
+      ORDER BY abbreviation ASC
     `, [], (err, rows) => {
       if (err) {
         return res.status(500).json({ error: err.message });
@@ -45,7 +49,7 @@ router.get('/:listType', (req, res) => {
 router.post('/:listType', (req, res) => {
   try {
     const table = validateListType(req.params.listType);
-    const { name, abbreviation, isDefault } = req.body;
+    const { name, abbreviation, description, isDefault } = req.body;
 
     if (!name || !abbreviation) {
       return res.status(400).json({ error: 'Name and abbreviation are required' });
@@ -61,16 +65,25 @@ router.post('/:listType', (req, res) => {
       });
     }
 
-    db.run(`
-      INSERT INTO ${table} (id, name, abbreviation, is_default)
-      VALUES (?, ?, ?, ?)
-    `, [id, name, abbreviation, isDefault ? 1 : 0], function(err) {
+    const isColourTable = table === 'horse_colours';
+    const insertQuery = isColourTable
+      ? `INSERT INTO ${table} (id, name, abbreviation, description, is_default) VALUES (?, ?, ?, ?, ?)`
+      : `INSERT INTO ${table} (id, name, abbreviation, is_default) VALUES (?, ?, ?, ?)`;
+    const insertParams = isColourTable
+      ? [id, name, abbreviation, description || name, isDefault ? 1 : 0]
+      : [id, name, abbreviation, isDefault ? 1 : 0];
+
+    db.run(insertQuery, insertParams, function(err) {
       if (err) {
         return res.status(500).json({ error: err.message });
       }
 
+      const selectColumns = isColourTable
+        ? 'id, name, abbreviation, description, is_default as isDefault, created_at, updated_at'
+        : 'id, name, abbreviation, is_default as isDefault, created_at, updated_at';
+
       db.get(`
-        SELECT id, name, abbreviation, is_default as isDefault, created_at, updated_at
+        SELECT ${selectColumns}
         FROM ${table}
         WHERE id = ?
       `, [id], (err, row) => {
@@ -93,7 +106,7 @@ router.put('/:listType/:id', (req, res) => {
   try {
     const table = validateListType(req.params.listType);
     const { id } = req.params;
-    const { name, abbreviation, isDefault } = req.body;
+    const { name, abbreviation, description, isDefault } = req.body;
 
     if (!name || !abbreviation) {
       return res.status(400).json({ error: 'Name and abbreviation are required' });
@@ -107,17 +120,25 @@ router.put('/:listType/:id', (req, res) => {
       });
     }
 
-    db.run(`
-      UPDATE ${table}
-      SET name = ?, abbreviation = ?, is_default = ?, updated_at = CURRENT_TIMESTAMP
-      WHERE id = ?
-    `, [name, abbreviation, isDefault ? 1 : 0, id], function(err) {
+    const isColourTable = table === 'horse_colours';
+    const updateQuery = isColourTable
+      ? `UPDATE ${table} SET name = ?, abbreviation = ?, description = ?, is_default = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`
+      : `UPDATE ${table} SET name = ?, abbreviation = ?, is_default = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`;
+    const updateParams = isColourTable
+      ? [name, abbreviation, description || name, isDefault ? 1 : 0, id]
+      : [name, abbreviation, isDefault ? 1 : 0, id];
+
+    db.run(updateQuery, updateParams, function(err) {
       if (err) {
         return res.status(500).json({ error: err.message });
       }
 
+      const selectColumns = isColourTable
+        ? 'id, name, abbreviation, description, is_default as isDefault, created_at, updated_at'
+        : 'id, name, abbreviation, is_default as isDefault, created_at, updated_at';
+
       db.get(`
-        SELECT id, name, abbreviation, is_default as isDefault, created_at, updated_at
+        SELECT ${selectColumns}
         FROM ${table}
         WHERE id = ?
       `, [id], (err, row) => {
