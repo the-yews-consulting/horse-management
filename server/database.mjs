@@ -317,6 +317,81 @@ const initPromise = new Promise((resolve, reject) => {
       }
     });
 
+    // Create horse_breeds table
+    db.run(`
+      CREATE TABLE IF NOT EXISTS horse_breeds (
+        id TEXT PRIMARY KEY,
+        name TEXT UNIQUE NOT NULL,
+        abbreviation TEXT NOT NULL,
+        is_default INTEGER DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `, (err) => {
+      if (err) {
+        console.error('Error creating horse_breeds table:', err);
+      } else {
+        db.run(`
+          INSERT OR IGNORE INTO horse_breeds (id, name, abbreviation, is_default) VALUES
+          ('${crypto.randomUUID()}', 'Pony', 'PNY', 0),
+          ('${crypto.randomUUID()}', 'Purebred Arabian', 'PA', 0),
+          ('${crypto.randomUUID()}', 'Quarter Horse', 'QTR', 0),
+          ('${crypto.randomUUID()}', 'Standardbred', 'STD', 0),
+          ('${crypto.randomUUID()}', 'Thoroughbred', 'TB', 1)
+        `);
+      }
+    });
+
+    // Create horse_colours table
+    db.run(`
+      CREATE TABLE IF NOT EXISTS horse_colours (
+        id TEXT PRIMARY KEY,
+        name TEXT UNIQUE NOT NULL,
+        abbreviation TEXT NOT NULL,
+        is_default INTEGER DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `, (err) => {
+      if (err) {
+        console.error('Error creating horse_colours table:', err);
+      } else {
+        db.run(`
+          INSERT OR IGNORE INTO horse_colours (id, name, abbreviation, is_default) VALUES
+          ('${crypto.randomUUID()}', 'Brown', 'BR', 0),
+          ('${crypto.randomUUID()}', 'Bay', 'BAY', 1),
+          ('${crypto.randomUUID()}', 'Chesnut', 'CH', 0),
+          ('${crypto.randomUUID()}', 'Grey', 'GR', 0),
+          ('${crypto.randomUUID()}', 'Black', 'BL', 0)
+        `);
+      }
+    });
+
+    // Create horse_genders table
+    db.run(`
+      CREATE TABLE IF NOT EXISTS horse_genders (
+        id TEXT PRIMARY KEY,
+        name TEXT UNIQUE NOT NULL,
+        abbreviation TEXT NOT NULL,
+        is_default INTEGER DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `, (err) => {
+      if (err) {
+        console.error('Error creating horse_genders table:', err);
+      } else {
+        db.run(`
+          INSERT OR IGNORE INTO horse_genders (id, name, abbreviation, is_default) VALUES
+          ('${crypto.randomUUID()}', 'Colt', 'C', 0),
+          ('${crypto.randomUUID()}', 'Gelding', 'G', 1),
+          ('${crypto.randomUUID()}', 'Stallion', 'S', 0),
+          ('${crypto.randomUUID()}', 'Filly', 'F', 0),
+          ('${crypto.randomUUID()}', 'Mare', 'M', 0)
+        `);
+      }
+    });
+
     // Create boarding assignments table
     db.run(`
       CREATE TABLE IF NOT EXISTS boarding_assignments (

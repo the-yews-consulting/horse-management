@@ -4,9 +4,19 @@ import { getHorses, createHorse, updateHorse, deleteHorse, getOwners, Horse, Own
 import { Modal } from '../components/Modal';
 import { QuickNav } from '../components/QuickNav';
 
+interface ListItem {
+  id: string;
+  name: string;
+  abbreviation: string;
+  isDefault: boolean;
+}
+
 export function HorsesPage() {
   const [horses, setHorses] = useState<Horse[]>([]);
   const [owners, setOwners] = useState<Owner[]>([]);
+  const [breeds, setBreeds] = useState<ListItem[]>([]);
+  const [colours, setColours] = useState<ListItem[]>([]);
+  const [genders, setGenders] = useState<ListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingHorse, setEditingHorse] = useState<Horse | null>(null);
@@ -41,6 +51,9 @@ export function HorsesPage() {
   useEffect(() => {
     loadHorses();
     loadOwners();
+    loadBreeds();
+    loadColours();
+    loadGenders();
   }, []);
 
   const loadHorses = async () => {
@@ -60,6 +73,48 @@ export function HorsesPage() {
       setOwners(data);
     } catch (error) {
       console.error('Failed to load owners:', error);
+    }
+  };
+
+  const loadBreeds = async () => {
+    try {
+      const response = await fetch('/api/horse-lists/breeds', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      const data = await response.json();
+      setBreeds(data);
+    } catch (error) {
+      console.error('Failed to load breeds:', error);
+    }
+  };
+
+  const loadColours = async () => {
+    try {
+      const response = await fetch('/api/horse-lists/colours', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      const data = await response.json();
+      setColours(data);
+    } catch (error) {
+      console.error('Failed to load colours:', error);
+    }
+  };
+
+  const loadGenders = async () => {
+    try {
+      const response = await fetch('/api/horse-lists/genders', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      const data = await response.json();
+      setGenders(data);
+    } catch (error) {
+      console.error('Failed to load genders:', error);
     }
   };
 
@@ -335,11 +390,11 @@ export function HorsesPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="">Select breed</option>
-                  <option value="Pony">Pony</option>
-                  <option value="Purebred Arabian">Purebred Arabian</option>
-                  <option value="Quarter Horse">Quarter Horse</option>
-                  <option value="Standardbred">Standardbred</option>
-                  <option value="Thoroughbred">Thoroughbred</option>
+                  {breeds.map((breed) => (
+                    <option key={breed.id} value={breed.name}>
+                      {breed.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -353,11 +408,11 @@ export function HorsesPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="">Select gender</option>
-                  <option value="colt">Colt</option>
-                  <option value="gelding">Gelding</option>
-                  <option value="stallion">Stallion</option>
-                  <option value="filly">Filly</option>
-                  <option value="mare">Mare</option>
+                  {genders.map((gender) => (
+                    <option key={gender.id} value={gender.name.toLowerCase()}>
+                      {gender.name}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -373,11 +428,11 @@ export function HorsesPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="">Select colour</option>
-                  <option value="Brown">Brown</option>
-                  <option value="Bay">Bay</option>
-                  <option value="Chesnut">Chesnut</option>
-                  <option value="Grey">Grey</option>
-                  <option value="Black">Black</option>
+                  {colours.map((colour) => (
+                    <option key={colour.id} value={colour.name}>
+                      {colour.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
