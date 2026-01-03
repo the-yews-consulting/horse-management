@@ -403,6 +403,32 @@ const initPromise = new Promise((resolve, reject) => {
       }
     });
 
+    // Create horse_statuses table
+    db.run(`
+      CREATE TABLE IF NOT EXISTS horse_statuses (
+        id TEXT PRIMARY KEY,
+        description TEXT UNIQUE NOT NULL,
+        is_default INTEGER DEFAULT 0,
+        is_dead INTEGER DEFAULT 0,
+        selected_by_default INTEGER DEFAULT 1,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `, (err) => {
+      if (err) {
+        console.error('Error creating horse_statuses table:', err);
+      } else {
+        db.run(`
+          INSERT OR IGNORE INTO horse_statuses (id, description, is_default, is_dead, selected_by_default) VALUES
+          ('${crypto.randomUUID()}', 'Active', 1, 0, 1),
+          ('${crypto.randomUUID()}', 'Dead', 0, 1, 1),
+          ('${crypto.randomUUID()}', 'Not Active', 0, 0, 1),
+          ('${crypto.randomUUID()}', 'Retired', 0, 0, 1),
+          ('${crypto.randomUUID()}', 'Sold', 0, 0, 1)
+        `);
+      }
+    });
+
     // Create boarding assignments table
     db.run(`
       CREATE TABLE IF NOT EXISTS boarding_assignments (

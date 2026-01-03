@@ -4,14 +4,16 @@ import { Modal } from './Modal';
 
 interface ListItem {
   id: string;
-  name: string;
-  abbreviation: string;
+  name?: string;
+  abbreviation?: string;
   description?: string;
   isDefault: boolean;
+  isDead?: boolean;
+  selectedByDefault?: boolean;
 }
 
 interface HorseListManagerProps {
-  listType: 'breeds' | 'colours' | 'genders';
+  listType: 'breeds' | 'colours' | 'genders' | 'statuses';
   title: string;
 }
 
@@ -20,9 +22,17 @@ export function HorseListManager({ listType, title }: HorseListManagerProps) {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ListItem | null>(null);
-  const [formData, setFormData] = useState({ name: '', abbreviation: '', description: '', isDefault: false });
+  const [formData, setFormData] = useState({
+    name: '',
+    abbreviation: '',
+    description: '',
+    isDefault: false,
+    isDead: false,
+    selectedByDefault: true
+  });
 
   const isColourList = listType === 'colours';
+  const isStatusList = listType === 'statuses';
 
   useEffect(() => {
     loadItems();
@@ -31,8 +41,6 @@ export function HorseListManager({ listType, title }: HorseListManagerProps) {
   const loadItems = async () => {
     try {
       const token = localStorage.getItem('token');
-      console.log('Loading items for listType:', listType);
-      console.log('Token exists:', !!token);
 
       const response = await fetch(`/api/horse-lists/${listType}`, {
         headers: {
@@ -40,20 +48,15 @@ export function HorseListManager({ listType, title }: HorseListManagerProps) {
         }
       });
 
-      console.log('Response status:', response.status);
-
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Failed to load items:', response.statusText, errorText);
+        console.error('Failed to load items:', response.statusText);
         setItems([]);
         return;
       }
 
       const data = await response.json();
-      console.log('Received data:', data);
 
       if (Array.isArray(data)) {
-        console.log('Setting items:', data.length, 'items');
         setItems(data);
       } else {
         console.error('Invalid data format:', data);
@@ -102,10 +105,12 @@ export function HorseListManager({ listType, title }: HorseListManagerProps) {
   const handleEdit = (item: ListItem) => {
     setEditingItem(item);
     setFormData({
-      name: item.name,
-      abbreviation: item.abbreviation,
-      description: item.description || item.name,
-      isDefault: item.isDefault
+      name: item.name || '',
+      abbreviation: item.abbreviation || '',
+      description: item.description || item.name || '',
+      isDefault: item.isDefault,
+      isDead: item.isDead || false,
+      selectedByDefault: item.selectedByDefault !== undefined ? item.selectedByDefault : true
     });
     setIsModalOpen(true);
   };
@@ -134,7 +139,14 @@ export function HorseListManager({ listType, title }: HorseListManagerProps) {
 
   const handleAddNew = () => {
     setEditingItem(null);
-    setFormData({ name: '', abbreviation: '', description: '', isDefault: false });
+    setFormData({
+      name: '',
+      abbreviation: '',
+      description: '',
+      isDefault: false,
+      isDead: false,
+      selectedByDefault: true
+    });
     setIsModalOpen(true);
   };
 
@@ -160,12 +172,26 @@ export function HorseListManager({ listType, title }: HorseListManagerProps) {
           <thead className="bg-gray-100">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {isColourList ? 'Abbreviation' : 'Name'}
+                {isStatusList ? 'Description ↑' : isColourList ? 'Abbreviation' : 'Name'}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {isColourList ? 'Description ↑' : 'Abbreviation'}
-              </th>
-              {!isColourList && (
+              {!isStatusList && (
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {isColourList ? 'Description ↑' : 'Abbreviation'}
+                </th>
+              )}
+              {isStatusList ? (
+                <>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Default
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Dead
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Selected By Default
+                  </th>
+                </>
+              ) : !isColourList && (
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Default
                 </th>
@@ -188,12 +214,26 @@ export function HorseListManager({ listType, title }: HorseListManagerProps) {
                 `}
               >
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {isColourList ? item.abbreviation : item.name}
+                  {isStatusList ? item.description : isColourList ? item.abbreviation : item.name}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {isColourList ? (item.description || item.name) : item.abbreviation}
-                </td>
-                {!isColourList && (
+                {!isStatusList && (
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {isColourList ? (item.description || item.name) : item.abbreviation}
+                  </td>
+                )}
+                {isStatusList ? (
+                  <>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {item.isDefault ? 'Yes' : 'No'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {item.isDead ? 'Yes' : 'No'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {item.selectedByDefault ? 'Yes' : 'No'}
+                    </td>
+                  </>
+                ) : !isColourList && (
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {item.isDefault ? 'Yes' : 'No'}
                   </td>
@@ -226,35 +266,7 @@ export function HorseListManager({ listType, title }: HorseListManagerProps) {
         title={editingItem ? `Edit ${title.slice(0, -1)}` : `Add New ${title.slice(0, -1)}`}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
-          {!isColourList && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Name *
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-          )}
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Abbreviation *
-            </label>
-            <input
-              type="text"
-              required
-              value={formData.abbreviation}
-              onChange={(e) => setFormData({ ...formData, abbreviation: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-
-          {isColourList && (
+          {isStatusList ? (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Description *
@@ -263,10 +275,55 @@ export function HorseListManager({ listType, title }: HorseListManagerProps) {
                 type="text"
                 required
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value, name: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
+          ) : (
+            <>
+              {!isColourList && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Abbreviation *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.abbreviation}
+                  onChange={(e) => setFormData({ ...formData, abbreviation: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              {isColourList && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Description *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value, name: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              )}
+            </>
           )}
 
           <div>
@@ -280,6 +337,34 @@ export function HorseListManager({ listType, title }: HorseListManagerProps) {
               <span className="text-sm font-medium text-gray-700">Set as default</span>
             </label>
           </div>
+
+          {isStatusList && (
+            <>
+              <div>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={formData.isDead}
+                    onChange={(e) => setFormData({ ...formData, isDead: e.target.checked })}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="text-sm font-medium text-gray-700">Mark as dead</span>
+                </label>
+              </div>
+
+              <div>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={formData.selectedByDefault}
+                    onChange={(e) => setFormData({ ...formData, selectedByDefault: e.target.checked })}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="text-sm font-medium text-gray-700">Selected by default</span>
+                </label>
+              </div>
+            </>
+          )}
 
           <div className="flex gap-3 pt-4">
             <button

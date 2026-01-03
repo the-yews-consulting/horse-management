@@ -10,7 +10,8 @@ router.use(authenticateToken);
 const TABLES = {
   breeds: 'horse_breeds',
   colours: 'horse_colours',
-  genders: 'horse_genders'
+  genders: 'horse_genders',
+  statuses: 'horse_statuses'
 };
 
 function validateListType(listType) {
@@ -23,21 +24,32 @@ function validateListType(listType) {
 router.get('/:listType', (req, res) => {
   try {
     const table = validateListType(req.params.listType);
-    const columns = table === 'horse_colours'
-      ? 'id, name, abbreviation, description, is_default as isDefault, created_at, updated_at'
-      : 'id, name, abbreviation, is_default as isDefault, created_at, updated_at';
+    let columns, orderBy;
+
+    if (table === 'horse_colours') {
+      columns = 'id, name, abbreviation, description, is_default as isDefault, created_at, updated_at';
+      orderBy = 'abbreviation ASC';
+    } else if (table === 'horse_statuses') {
+      columns = 'id, description, is_default as isDefault, is_dead as isDead, selected_by_default as selectedByDefault, created_at, updated_at';
+      orderBy = 'description ASC';
+    } else {
+      columns = 'id, name, abbreviation, is_default as isDefault, created_at, updated_at';
+      orderBy = 'abbreviation ASC';
+    }
 
     db.all(`
       SELECT ${columns}
       FROM ${table}
-      ORDER BY abbreviation ASC
+      ORDER BY ${orderBy}
     `, [], (err, rows) => {
       if (err) {
         return res.status(500).json({ error: err.message });
       }
       res.json(rows.map(row => ({
         ...row,
-        isDefault: row.isDefault === 1
+        isDefault: row.isDefault === 1,
+        isDead: row.isDead === 1,
+        selectedByDefault: row.selectedByDefault === 1
       })));
     });
   } catch (error) {
@@ -49,10 +61,19 @@ router.get('/:listType', (req, res) => {
 router.post('/:listType', (req, res) => {
   try {
     const table = validateListType(req.params.listType);
-    const { name, abbreviation, description, isDefault } = req.body;
+    const { name, abbreviation, description, isDefault, isDead, selectedByDefault } = req.body;
 
-    if (!name || !abbreviation) {
-      return res.status(400).json({ error: 'Name and abbreviation are required' });
+    const isStatusTable = table === 'horse_statuses';
+    const isColourTable = table === 'horse_colours';
+
+    if (isStatusTable) {
+      if (!description) {
+        return res.status(400).json({ error: 'Description is required' });
+      }
+    } else {
+      if (!name || !abbreviation) {
+        return res.status(400).json({ error: 'Name and abbreviation are required' });
+      }
     }
 
     const id = crypto.randomUUID();
@@ -65,22 +86,31 @@ router.post('/:listType', (req, res) => {
       });
     }
 
-    const isColourTable = table === 'horse_colours';
-    const insertQuery = isColourTable
-      ? `INSERT INTO ${table} (id, name, abbreviation, description, is_default) VALUES (?, ?, ?, ?, ?)`
-      : `INSERT INTO ${table} (id, name, abbreviation, is_default) VALUES (?, ?, ?, ?)`;
-    const insertParams = isColourTable
-      ? [id, name, abbreviation, description || name, isDefault ? 1 : 0]
-      : [id, name, abbreviation, isDefault ? 1 : 0];
+    let insertQuery, insertParams;
+    if (isStatusTable) {
+      insertQuery = `INSERT INTO ${table} (id, description, is_default, is_dead, selected_by_default) VALUES (?, ?, ?, ?, ?)`;
+      insertParams = [id, description, isDefault ? 1 : 0, isDead ? 1 : 0, selectedByDefault ? 1 : 0];
+    } else if (isColourTable) {
+      insertQuery = `INSERT INTO ${table} (id, name, abbreviation, description, is_default) VALUES (?, ?, ?, ?, ?)`;
+      insertParams = [id, name, abbreviation, description || name, isDefault ? 1 : 0];
+    } else {
+      insertQuery = `INSERT INTO ${table} (id, name, abbreviation, is_default) VALUES (?, ?, ?, ?)`;
+      insertParams = [id, name, abbreviation, isDefault ? 1 : 0];
+    }
 
     db.run(insertQuery, insertParams, function(err) {
       if (err) {
         return res.status(500).json({ error: err.message });
       }
 
-      const selectColumns = isColourTable
-        ? 'id, name, abbreviation, description, is_default as isDefault, created_at, updated_at'
-        : 'id, name, abbreviation, is_default as isDefault, created_at, updated_at';
+      let selectColumns;
+      if (isStatusTable) {
+        selectColumns = 'id, description, is_default as isDefault, is_dead as isDead, selected_by_default as selectedByDefault, created_at, updated_at';
+      } else if (isColourTable) {
+        selectColumns = 'id, name, abbreviation, description, is_default as isDefault, created_at, updated_at';
+      } else {
+        selectColumns = 'id, name, abbreviation, is_default as isDefault, created_at, updated_at';
+      }
 
       db.get(`
         SELECT ${selectColumns}
@@ -92,7 +122,9 @@ router.post('/:listType', (req, res) => {
         }
         res.json({
           ...row,
-          isDefault: row.isDefault === 1
+          isDefault: row.isDefault === 1,
+          isDead: row.isDead === 1,
+          selectedByDefault: row.selectedByDefault === 1
         });
       });
     });
@@ -106,10 +138,19 @@ router.put('/:listType/:id', (req, res) => {
   try {
     const table = validateListType(req.params.listType);
     const { id } = req.params;
-    const { name, abbreviation, description, isDefault } = req.body;
+    const { name, abbreviation, description, isDefault, isDead, selectedByDefault } = req.body;
 
-    if (!name || !abbreviation) {
-      return res.status(400).json({ error: 'Name and abbreviation are required' });
+    const isStatusTable = table === 'horse_statuses';
+    const isColourTable = table === 'horse_colours';
+
+    if (isStatusTable) {
+      if (!description) {
+        return res.status(400).json({ error: 'Description is required' });
+      }
+    } else {
+      if (!name || !abbreviation) {
+        return res.status(400).json({ error: 'Name and abbreviation are required' });
+      }
     }
 
     if (isDefault) {
@@ -120,22 +161,31 @@ router.put('/:listType/:id', (req, res) => {
       });
     }
 
-    const isColourTable = table === 'horse_colours';
-    const updateQuery = isColourTable
-      ? `UPDATE ${table} SET name = ?, abbreviation = ?, description = ?, is_default = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`
-      : `UPDATE ${table} SET name = ?, abbreviation = ?, is_default = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`;
-    const updateParams = isColourTable
-      ? [name, abbreviation, description || name, isDefault ? 1 : 0, id]
-      : [name, abbreviation, isDefault ? 1 : 0, id];
+    let updateQuery, updateParams;
+    if (isStatusTable) {
+      updateQuery = `UPDATE ${table} SET description = ?, is_default = ?, is_dead = ?, selected_by_default = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`;
+      updateParams = [description, isDefault ? 1 : 0, isDead ? 1 : 0, selectedByDefault ? 1 : 0, id];
+    } else if (isColourTable) {
+      updateQuery = `UPDATE ${table} SET name = ?, abbreviation = ?, description = ?, is_default = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`;
+      updateParams = [name, abbreviation, description || name, isDefault ? 1 : 0, id];
+    } else {
+      updateQuery = `UPDATE ${table} SET name = ?, abbreviation = ?, is_default = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`;
+      updateParams = [name, abbreviation, isDefault ? 1 : 0, id];
+    }
 
     db.run(updateQuery, updateParams, function(err) {
       if (err) {
         return res.status(500).json({ error: err.message });
       }
 
-      const selectColumns = isColourTable
-        ? 'id, name, abbreviation, description, is_default as isDefault, created_at, updated_at'
-        : 'id, name, abbreviation, is_default as isDefault, created_at, updated_at';
+      let selectColumns;
+      if (isStatusTable) {
+        selectColumns = 'id, description, is_default as isDefault, is_dead as isDead, selected_by_default as selectedByDefault, created_at, updated_at';
+      } else if (isColourTable) {
+        selectColumns = 'id, name, abbreviation, description, is_default as isDefault, created_at, updated_at';
+      } else {
+        selectColumns = 'id, name, abbreviation, is_default as isDefault, created_at, updated_at';
+      }
 
       db.get(`
         SELECT ${selectColumns}
@@ -147,7 +197,9 @@ router.put('/:listType/:id', (req, res) => {
         }
         res.json({
           ...row,
-          isDefault: row.isDefault === 1
+          isDefault: row.isDefault === 1,
+          isDead: row.isDead === 1,
+          selectedByDefault: row.selectedByDefault === 1
         });
       });
     });
