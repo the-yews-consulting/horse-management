@@ -30,21 +30,30 @@ export function HorseListManager({ listType, title }: HorseListManagerProps) {
 
   const loadItems = async () => {
     try {
+      const token = localStorage.getItem('token');
+      console.log('Loading items for listType:', listType);
+      console.log('Token exists:', !!token);
+
       const response = await fetch(`/api/horse-lists/${listType}`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
 
+      console.log('Response status:', response.status);
+
       if (!response.ok) {
-        console.error('Failed to load items:', response.statusText);
+        const errorText = await response.text();
+        console.error('Failed to load items:', response.statusText, errorText);
         setItems([]);
         return;
       }
 
       const data = await response.json();
+      console.log('Received data:', data);
 
       if (Array.isArray(data)) {
+        console.log('Setting items:', data.length, 'items');
         setItems(data);
       } else {
         console.error('Invalid data format:', data);
