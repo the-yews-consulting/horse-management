@@ -49,8 +49,13 @@ export function HomeAssistantProvider({ children }: HomeAssistantProviderProps) 
       setIsConnected(true);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch entities');
-      setIsConnected(false);
+      if (err instanceof Error && err.message.includes('not configured')) {
+        setIsConnected(false);
+        setError(null);
+      } else {
+        setError(err instanceof Error ? err.message : 'Failed to fetch entities');
+        setIsConnected(false);
+      }
     }
   }, []);
 
@@ -63,6 +68,11 @@ export function HomeAssistantProvider({ children }: HomeAssistantProviderProps) 
   const setupWebSocket = useCallback(async () => {
     try {
       const wsConfig = await api.getWebSocketConfig();
+
+      if (!wsConfig.url || !wsConfig.token) {
+        throw new Error('WebSocket configuration is incomplete');
+      }
+
       const conn = await connectWebSocket(wsConfig.url, wsConfig.token);
       connectionRef.current = conn;
 
@@ -76,7 +86,11 @@ export function HomeAssistantProvider({ children }: HomeAssistantProviderProps) 
       setError(err instanceof Error ? err.message : 'Failed to connect via WebSocket');
       setIsConnected(false);
 
-      await refreshEntities();
+      try {
+        await refreshEntities();
+      } catch (refreshErr) {
+        console.error('Failed to refresh entities:', refreshErr);
+      }
     }
   }, [handleEntitiesUpdate, refreshEntities]);
 
@@ -120,16 +134,24 @@ export function HomeAssistantProvider({ children }: HomeAssistantProviderProps) 
       if (status.hasToken) {
         const verification = await api.verifyConnection();
         if (verification.success) {
-          await setupWebSocket();
+          try {
+            await setupWebSocket();
+          } catch (wsErr) {
+            console.error('WebSocket setup failed, using polling:', wsErr);
+          }
         } else {
           setError(verification.error || 'Connection failed');
           setIsConnected(false);
         }
+      } else {
+        setIsConnected(false);
+        setError(null);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to check connection');
+      console.error('Token status check failed:', err);
       setHasToken(false);
       setIsConnected(false);
+      setError(null);
     } finally {
       setIsLoading(false);
     }

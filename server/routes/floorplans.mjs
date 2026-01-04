@@ -8,6 +8,10 @@ router.use(authenticateToken);
 
 router.get('/', async (req, res) => {
   try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
     const { data, error } = await supabase
       .from('floorplans')
       .select('*')
@@ -15,7 +19,7 @@ router.get('/', async (req, res) => {
 
     if (error) throw error;
 
-    res.json(data);
+    res.json(data || []);
   } catch (error) {
     console.error('Error fetching floorplans:', error);
     res.status(500).json({ error: 'Failed to fetch floorplans' });

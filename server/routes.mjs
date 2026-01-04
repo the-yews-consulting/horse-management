@@ -104,6 +104,10 @@ router.get('/verify', async (req, res) => {
 
 router.get('/states', async (req, res) => {
   try {
+    const token = await getConfig('ha_token');
+    if (!token) {
+      return res.status(401).json({ error: 'Home Assistant token not configured' });
+    }
     const states = await getStates();
     res.json(states);
   } catch (error) {
