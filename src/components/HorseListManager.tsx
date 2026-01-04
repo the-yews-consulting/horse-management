@@ -263,7 +263,7 @@ export function HorseListManager({ listType, title }: HorseListManagerProps) {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingItem ? `Edit ${title.slice(0, -1)}` : `Add New ${title.slice(0, -1)}`}
+        title={editingItem ? `Edit ${title}` : `Add New ${title}`}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           {isStatusList ? (
