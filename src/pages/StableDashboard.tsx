@@ -1,7 +1,47 @@
-import { Activity, PawPrint, Building2, Users, Warehouse } from 'lucide-react';
+import { Activity, Users, Warehouse } from 'lucide-react';
 import { HorseHead } from '../components/HorseHeadIcon';
+import { useState, useEffect } from 'react';
+import { getHorses, getStalls, getOwners } from '../services/api';
 
 export function StableDashboard() {
+  const [stats, setStats] = useState({
+    horses: 0,
+    stalls: 0,
+    owners: 0,
+    occupancyRate: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const [horses, stalls, owners] = await Promise.all([
+          getHorses(),
+          getStalls(),
+          getOwners()
+        ]);
+
+        const occupiedStalls = stalls.filter(s => s.status === 'occupied').length;
+        const occupancyRate = stalls.length > 0
+          ? Math.round((occupiedStalls / stalls.length) * 100)
+          : 0;
+
+        setStats({
+          horses: horses.length,
+          stalls: stalls.length,
+          owners: owners.length,
+          occupancyRate
+        });
+      } catch (error) {
+        console.error('Failed to fetch stats:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
   return (
     <div className="space-y-6">
       <div>
@@ -14,7 +54,9 @@ export function StableDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Horses</p>
-              <p className="text-3xl font-bold text-gray-900 mt-2">0</p>
+              <p className="text-3xl font-bold text-gray-900 mt-2">
+                {loading ? '...' : stats.horses}
+              </p>
             </div>
             <HorseHead className="h-12 w-12 text-green-600 opacity-80" />
           </div>
@@ -24,7 +66,9 @@ export function StableDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Stalls</p>
-              <p className="text-3xl font-bold text-gray-900 mt-2">0</p>
+              <p className="text-3xl font-bold text-gray-900 mt-2">
+                {loading ? '...' : stats.stalls}
+              </p>
             </div>
             <Warehouse className="h-12 w-12 text-blue-600 opacity-80" />
           </div>
@@ -34,9 +78,11 @@ export function StableDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Owners</p>
-              <p className="text-3xl font-bold text-gray-900 mt-2">0</p>
+              <p className="text-3xl font-bold text-gray-900 mt-2">
+                {loading ? '...' : stats.owners}
+              </p>
             </div>
-            <Users className="h-12 w-12 text-purple-600 opacity-80" />
+            <Users className="h-12 w-12 text-amber-600 opacity-80" />
           </div>
         </div>
 
@@ -44,7 +90,9 @@ export function StableDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Occupancy Rate</p>
-              <p className="text-3xl font-bold text-gray-900 mt-2">0%</p>
+              <p className="text-3xl font-bold text-gray-900 mt-2">
+                {loading ? '...' : `${stats.occupancyRate}%`}
+              </p>
             </div>
             <Activity className="h-12 w-12 text-orange-600 opacity-80" />
           </div>
