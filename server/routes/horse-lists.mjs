@@ -1,6 +1,5 @@
 import express from 'express';
-import crypto from 'crypto';
-import { db } from '../database.mjs';
+import { supabase } from '../supabase.mjs';
 import { authenticateToken } from '../middleware/auth.mjs';
 
 const router = express.Router();
@@ -21,44 +20,43 @@ function validateListType(listType) {
   return TABLES[listType];
 }
 
-router.get('/:listType', (req, res) => {
+router.get('/:listType', async (req, res) => {
   try {
     const table = validateListType(req.params.listType);
-    let columns, orderBy;
+    let orderBy;
 
     if (table === 'horse_colours') {
-      columns = 'id, name, abbreviation, description, is_default as isDefault, created_at, updated_at';
-      orderBy = 'abbreviation ASC';
+      orderBy = { column: 'abbreviation', ascending: true };
     } else if (table === 'horse_statuses') {
-      columns = 'id, description, is_default as isDefault, is_dead as isDead, selected_by_default as selectedByDefault, created_at, updated_at';
-      orderBy = 'description ASC';
+      orderBy = { column: 'description', ascending: true };
     } else {
-      columns = 'id, name, abbreviation, is_default as isDefault, created_at, updated_at';
-      orderBy = 'abbreviation ASC';
+      orderBy = { column: 'abbreviation', ascending: true };
     }
 
-    db.all(`
-      SELECT ${columns}
-      FROM ${table}
-      ORDER BY ${orderBy}
-    `, [], (err, rows) => {
-      if (err) {
-        return res.status(500).json({ error: err.message });
-      }
-      res.json(rows.map(row => ({
-        ...row,
-        isDefault: row.isDefault === 1,
-        isDead: row.isDead === 1,
-        selectedByDefault: row.selectedByDefault === 1
-      })));
-    });
+    const { data, error } = await supabase
+      .from(table)
+      .select('*')
+      .order(orderBy.column, { ascending: orderBy.ascending });
+
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+
+    const formattedData = data.map(row => ({
+      ...row,
+      isDefault: row.is_default,
+      isDead: row.is_dead,
+      selectedByDefault: row.selected_by_default
+    }));
+
+    res.json(formattedData);
   } catch (error) {
     console.error('Error fetching list items:', error);
     res.status(400).json({ error: error.message });
   }
 });
 
-router.post('/:listType', (req, res) => {
+router.post('/:listType', async (req, res) => {
   try {
     const table = validateListType(req.params.listType);
     const { name, abbreviation, description, isDefault, isDead, selectedByDefault } = req.body;
@@ -76,57 +74,49 @@ router.post('/:listType', (req, res) => {
       }
     }
 
-    const id = crypto.randomUUID();
-
     if (isDefault) {
-      db.run(`UPDATE ${table} SET is_default = 0`, (err) => {
-        if (err) {
-          return res.status(500).json({ error: err.message });
-        }
-      });
+      await supabase
+        .from(table)
+        .update({ is_default: false });
     }
 
-    let insertQuery, insertParams;
+    let insertData;
     if (isStatusTable) {
-      insertQuery = `INSERT INTO ${table} (id, description, is_default, is_dead, selected_by_default) VALUES (?, ?, ?, ?, ?)`;
-      insertParams = [id, description, isDefault ? 1 : 0, isDead ? 1 : 0, selectedByDefault ? 1 : 0];
+      insertData = {
+        description,
+        is_default: isDefault || false,
+        is_dead: isDead || false,
+        selected_by_default: selectedByDefault !== undefined ? selectedByDefault : true
+      };
     } else if (isColourTable) {
-      insertQuery = `INSERT INTO ${table} (id, name, abbreviation, description, is_default) VALUES (?, ?, ?, ?, ?)`;
-      insertParams = [id, name, abbreviation, description || name, isDefault ? 1 : 0];
+      insertData = {
+        name,
+        abbreviation,
+        is_default: isDefault || false
+      };
     } else {
-      insertQuery = `INSERT INTO ${table} (id, name, abbreviation, is_default) VALUES (?, ?, ?, ?)`;
-      insertParams = [id, name, abbreviation, isDefault ? 1 : 0];
+      insertData = {
+        name,
+        abbreviation,
+        is_default: isDefault || false
+      };
     }
 
-    db.run(insertQuery, insertParams, function(err) {
-      if (err) {
-        return res.status(500).json({ error: err.message });
-      }
+    const { data, error } = await supabase
+      .from(table)
+      .insert(insertData)
+      .select()
+      .single();
 
-      let selectColumns;
-      if (isStatusTable) {
-        selectColumns = 'id, description, is_default as isDefault, is_dead as isDead, selected_by_default as selectedByDefault, created_at, updated_at';
-      } else if (isColourTable) {
-        selectColumns = 'id, name, abbreviation, description, is_default as isDefault, created_at, updated_at';
-      } else {
-        selectColumns = 'id, name, abbreviation, is_default as isDefault, created_at, updated_at';
-      }
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
 
-      db.get(`
-        SELECT ${selectColumns}
-        FROM ${table}
-        WHERE id = ?
-      `, [id], (err, row) => {
-        if (err) {
-          return res.status(500).json({ error: err.message });
-        }
-        res.json({
-          ...row,
-          isDefault: row.isDefault === 1,
-          isDead: row.isDead === 1,
-          selectedByDefault: row.selectedByDefault === 1
-        });
-      });
+    res.json({
+      ...data,
+      isDefault: data.is_default,
+      isDead: data.is_dead,
+      selectedByDefault: data.selected_by_default
     });
   } catch (error) {
     console.error('Error creating list item:', error);
@@ -134,7 +124,7 @@ router.post('/:listType', (req, res) => {
   }
 });
 
-router.put('/:listType/:id', (req, res) => {
+router.put('/:listType/:id', async (req, res) => {
   try {
     const table = validateListType(req.params.listType);
     const { id } = req.params;
@@ -154,54 +144,49 @@ router.put('/:listType/:id', (req, res) => {
     }
 
     if (isDefault) {
-      db.run(`UPDATE ${table} SET is_default = 0`, (err) => {
-        if (err) {
-          return res.status(500).json({ error: err.message });
-        }
-      });
+      await supabase
+        .from(table)
+        .update({ is_default: false });
     }
 
-    let updateQuery, updateParams;
+    let updateData;
     if (isStatusTable) {
-      updateQuery = `UPDATE ${table} SET description = ?, is_default = ?, is_dead = ?, selected_by_default = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`;
-      updateParams = [description, isDefault ? 1 : 0, isDead ? 1 : 0, selectedByDefault ? 1 : 0, id];
+      updateData = {
+        description,
+        is_default: isDefault || false,
+        is_dead: isDead || false,
+        selected_by_default: selectedByDefault !== undefined ? selectedByDefault : true
+      };
     } else if (isColourTable) {
-      updateQuery = `UPDATE ${table} SET name = ?, abbreviation = ?, description = ?, is_default = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`;
-      updateParams = [name, abbreviation, description || name, isDefault ? 1 : 0, id];
+      updateData = {
+        name,
+        abbreviation,
+        is_default: isDefault || false
+      };
     } else {
-      updateQuery = `UPDATE ${table} SET name = ?, abbreviation = ?, is_default = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`;
-      updateParams = [name, abbreviation, isDefault ? 1 : 0, id];
+      updateData = {
+        name,
+        abbreviation,
+        is_default: isDefault || false
+      };
     }
 
-    db.run(updateQuery, updateParams, function(err) {
-      if (err) {
-        return res.status(500).json({ error: err.message });
-      }
+    const { data, error } = await supabase
+      .from(table)
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single();
 
-      let selectColumns;
-      if (isStatusTable) {
-        selectColumns = 'id, description, is_default as isDefault, is_dead as isDead, selected_by_default as selectedByDefault, created_at, updated_at';
-      } else if (isColourTable) {
-        selectColumns = 'id, name, abbreviation, description, is_default as isDefault, created_at, updated_at';
-      } else {
-        selectColumns = 'id, name, abbreviation, is_default as isDefault, created_at, updated_at';
-      }
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
 
-      db.get(`
-        SELECT ${selectColumns}
-        FROM ${table}
-        WHERE id = ?
-      `, [id], (err, row) => {
-        if (err) {
-          return res.status(500).json({ error: err.message });
-        }
-        res.json({
-          ...row,
-          isDefault: row.isDefault === 1,
-          isDead: row.isDead === 1,
-          selectedByDefault: row.selectedByDefault === 1
-        });
-      });
+    res.json({
+      ...data,
+      isDefault: data.is_default,
+      isDead: data.is_dead,
+      selectedByDefault: data.selected_by_default
     });
   } catch (error) {
     console.error('Error updating list item:', error);
@@ -209,17 +194,21 @@ router.put('/:listType/:id', (req, res) => {
   }
 });
 
-router.delete('/:listType/:id', (req, res) => {
+router.delete('/:listType/:id', async (req, res) => {
   try {
     const table = validateListType(req.params.listType);
     const { id } = req.params;
 
-    db.run(`DELETE FROM ${table} WHERE id = ?`, [id], function(err) {
-      if (err) {
-        return res.status(500).json({ error: err.message });
-      }
-      res.json({ success: true });
-    });
+    const { error } = await supabase
+      .from(table)
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      return res.status(500).json({ error: error.message });
+    }
+
+    res.json({ success: true });
   } catch (error) {
     console.error('Error deleting list item:', error);
     res.status(400).json({ error: error.message });
