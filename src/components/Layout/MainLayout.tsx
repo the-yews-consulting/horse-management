@@ -4,7 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import {
   LayoutDashboard,
   Users,
-  ActivitySquare,
+  Activity,
   Stethoscope,
   Calendar,
   Home,
@@ -14,7 +14,7 @@ import {
   LogOut,
   User
 } from 'lucide-react';
-import { House as HousePlus } from '../HouseIcon';
+import { house as HousePlus } from '@lucide/lab';
 import { HorseHead } from '../HorseHeadIcon';
 
 export function MainLayout() {
@@ -62,7 +62,7 @@ export function MainLayout() {
           <div className="flex flex-col h-full">
             <div className="flex items-center justify-between p-4 border-b">
               <div className="flex items-center space-x-2">
-                <ActivitySquare className="h-8 w-8 text-green-600" />
+                <Activity className="h-8 w-8 text-green-600" />
                 <span className="text-xl font-bold text-gray-800">StableManager</span>
               </div>
               <button
@@ -125,7 +125,7 @@ export function MainLayout() {
                 <Menu className="h-6 w-6" />
               </button>
               <div className="flex items-center space-x-2">
-                <ActivitySquare className="h-6 w-6 text-green-600" />
+                <Activity className="h-6 w-6 text-green-600" />
                 <span className="text-lg font-bold text-gray-800">StableManager</span>
               </div>
               <div className="w-6" />

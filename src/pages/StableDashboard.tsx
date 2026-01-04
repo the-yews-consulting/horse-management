@@ -1,4 +1,6 @@
-import { Activity, PawPrint, Building2, Users, Warehouse } from 'lucide-react';
+import { Activity, Users } from 'lucide-react';
+import { house as HousePlus } from '@lucide/lab';
+import { HorseHead } from '../components/HorseHeadIcon';
 
 export function StableDashboard() {
   return (
@@ -15,7 +17,7 @@ export function StableDashboard() {
               <p className="text-sm font-medium text-gray-600">Total Horses</p>
               <p className="text-3xl font-bold text-gray-900 mt-2">0</p>
             </div>
-            <PawPrint className="h-12 w-12 text-green-600 opacity-80" />
+            <HorseHead className="h-12 w-12 text-green-600 opacity-80" />
           </div>
         </div>
 
@@ -25,7 +27,7 @@ export function StableDashboard() {
               <p className="text-sm font-medium text-gray-600">Total Stalls</p>
               <p className="text-3xl font-bold text-gray-900 mt-2">0</p>
             </div>
-            <Warehouse className="h-12 w-12 text-blue-600 opacity-80" />
+            <HousePlus className="h-12 w-12 text-blue-600 opacity-80" />
           </div>
         </div>
 
