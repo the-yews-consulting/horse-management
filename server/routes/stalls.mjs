@@ -40,14 +40,22 @@ router.get('/:id', authenticateToken, async (req, res) => {
 
 router.post('/', authenticateToken, async (req, res) => {
   try {
-    const { data, error } = await supabase
+    const { data: insertData, error: insertError } = await supabase
       .from('stalls')
       .insert([req.body])
       .select()
       .single();
 
+    if (insertError) throw insertError;
+
+    const { data, error } = await supabase
+      .from('stalls')
+      .select('*, barns(name), yards(name)')
+      .eq('id', insertData.id)
+      .maybeSingle();
+
     if (error) throw error;
-    res.status(201).json(data);
+    res.status(201).json(data || insertData);
   } catch (error) {
     console.error('Error creating stall:', error);
     res.status(500).json({ error: 'Failed to create stall' });
@@ -56,12 +64,18 @@ router.post('/', authenticateToken, async (req, res) => {
 
 router.put('/:id', authenticateToken, async (req, res) => {
   try {
-    const { data, error } = await supabase
+    const { error: updateError } = await supabase
       .from('stalls')
       .update({ ...req.body, updated_at: new Date().toISOString() })
+      .eq('id', req.params.id);
+
+    if (updateError) throw updateError;
+
+    const { data, error } = await supabase
+      .from('stalls')
+      .select('*, barns(name), yards(name)')
       .eq('id', req.params.id)
-      .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
     res.json(data);
