@@ -34,7 +34,7 @@ function App() {
               <Route path="whiteboard" element={<WhiteboardPage />} />
               <Route path="home-assistant" element={<HomeAssistantPage />} />
               <Route path="admin" element={
-                <ProtectedRoute requiredRoles={['admin']}>
+                <ProtectedRoute requiredRoles={['super_admin', 'admin']}>
                   <AdminPage />
                 </ProtectedRoute>
               } />
