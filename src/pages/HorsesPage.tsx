@@ -136,6 +136,7 @@ export function HorsesPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      console.log('Submitting horse data:', formData);
       if (editingHorse) {
         await updateHorse(editingHorse.id!, formData as Horse);
       } else {
@@ -172,7 +173,7 @@ export function HorsesPage() {
       loadHorses();
     } catch (error) {
       console.error('Failed to save horse:', error);
-      alert('Failed to save horse. Please try again.');
+      alert(`Failed to save horse: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 

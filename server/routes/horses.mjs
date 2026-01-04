@@ -38,9 +38,13 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', requireRole('admin', 'staff'), async (req, res) => {
   try {
+    console.log('Received horse creation request:', req.body);
+    console.log('User:', req.user);
     const horse = await createHorse(req.body);
+    console.log('Horse created successfully:', horse);
     res.status(201).json(horse);
   } catch (error) {
+    console.error('Error creating horse:', error);
     res.status(400).json({ error: error.message });
   }
 });
