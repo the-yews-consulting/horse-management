@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
-import { HousePlus, Users } from 'lucide-react';
+import { Users } from 'lucide-react';
+import { house as HousePlus } from '@lucide/lab';
 import { HorseHead } from './HorseHeadIcon';
 
 export function QuickNav() {

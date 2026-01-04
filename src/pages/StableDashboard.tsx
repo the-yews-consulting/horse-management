@@ -1,4 +1,5 @@
-import { Activity, HousePlus, Users } from 'lucide-react';
+import { Activity, Users } from 'lucide-react';
+import { house as HousePlus } from '@lucide/lab';
 import { HorseHead } from '../components/HorseHeadIcon';
 
 export function StableDashboard() {

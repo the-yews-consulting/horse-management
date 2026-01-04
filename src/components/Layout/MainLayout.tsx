@@ -3,7 +3,6 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   LayoutDashboard,
-  HousePlus,
   Users,
   Activity,
   Stethoscope,
@@ -15,6 +14,7 @@ import {
   LogOut,
   User
 } from 'lucide-react';
+import { house as HousePlus } from '@lucide/lab';
 import { HorseHead } from '../HorseHeadIcon';
 
 export function MainLayout() {
