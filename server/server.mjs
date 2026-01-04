@@ -18,6 +18,7 @@ import horseListsRoutes from './routes/horse-lists.mjs';
 import farmsRoutes from './routes/farms.mjs';
 import yardsRoutes from './routes/yards.mjs';
 import floorplansRoutes from './routes/floorplans.mjs';
+import mediaRoutes from './routes/media.mjs';
 import { dbReady } from './database.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -45,6 +46,7 @@ app.use('/api/horse-lists', horseListsRoutes);
 app.use('/api/farms', farmsRoutes);
 app.use('/api/yards', yardsRoutes);
 app.use('/api/floorplans', floorplansRoutes);
+app.use('/api/horses', mediaRoutes);
 
 app.use(express.static(path.join(__dirname, '../dist')));
 

@@ -4,6 +4,7 @@ import { getHorses, createHorse, updateHorse, deleteHorse, getOwners, Horse, Own
 import { Modal } from '../components/Modal';
 import { QuickNav } from '../components/QuickNav';
 import HorseMarkingsEditor from '../components/HorseMarkingsEditor';
+import MediaManager from '../components/MediaManager';
 
 interface ListItem {
   id: string;
@@ -349,6 +350,7 @@ export function HorsesPage() {
                 { id: 'inquiry', label: 'Inquiry' },
                 { id: 'performance', label: 'Performance' },
                 { id: 'media', label: 'Media' },
+                { id: 'media_new', label: 'Media New' },
                 { id: 'links', label: 'Links' },
               ].map((tab) => (
                 <button
@@ -751,6 +753,12 @@ export function HorsesPage() {
                     placeholder="One URL per line..."
                   />
                 </div>
+              </div>
+            )}
+
+            {activeTab === 'media_new' && editingHorse && (
+              <div className="space-y-4">
+                <MediaManager horseId={editingHorse.id} />
               </div>
             )}
 
