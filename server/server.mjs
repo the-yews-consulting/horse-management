@@ -15,6 +15,8 @@ import usersRoutes from './routes/users.mjs';
 import boardingRoutes from './routes/boarding.mjs';
 import haIntegrationRoutes from './routes/ha-integration.mjs';
 import horseListsRoutes from './routes/horse-lists.mjs';
+import farmsRoutes from './routes/farms.mjs';
+import yardsRoutes from './routes/yards.mjs';
 import { dbReady } from './database.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -39,6 +41,8 @@ app.use('/api/users', usersRoutes);
 app.use('/api/boarding', boardingRoutes);
 app.use('/api/ha-integration', haIntegrationRoutes);
 app.use('/api/horse-lists', horseListsRoutes);
+app.use('/api/farms', farmsRoutes);
+app.use('/api/yards', yardsRoutes);
 
 app.use(express.static(path.join(__dirname, '../dist')));
 
