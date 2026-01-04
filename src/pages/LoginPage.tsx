@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Activity, Mail, Lock, AlertCircle, Loader2 } from 'lucide-react';
+import { ActivitySquare, Mail, Lock, AlertCircle, Loader2 } from 'lucide-react';
 
 export function LoginPage() {
   const [email, setEmail] = useState('');
@@ -37,7 +37,7 @@ export function LoginPage() {
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <div className="bg-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <Activity className="h-8 w-8 text-green-600" />
+            <ActivitySquare className="h-8 w-8 text-green-600" />
           </div>
           <h1 className="text-3xl font-bold text-white mb-2">StableManager</h1>
           <p className="text-green-100">Horse stable management system</p>
