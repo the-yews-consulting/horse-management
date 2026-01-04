@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Building2, Users } from 'lucide-react';
-import { horseHead as HorseHead } from '@lucide/lab';
+import { HorseHead } from './HorseHeadIcon';
 
 export function QuickNav() {
   const location = useLocation();

@@ -1,5 +1,5 @@
 import { Activity, Building2, Users } from 'lucide-react';
-import { horseHead as HorseHead } from '@lucide/lab';
+import { HorseHead } from '../components/HorseHeadIcon';
 
 export function StableDashboard() {
   return (

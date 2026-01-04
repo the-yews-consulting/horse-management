@@ -15,7 +15,7 @@ import {
   LogOut,
   User
 } from 'lucide-react';
-import { horseHead as HorseHead } from '@lucide/lab';
+import { HorseHead } from '../HorseHeadIcon';
 
 export function MainLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
