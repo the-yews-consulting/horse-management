@@ -42,6 +42,23 @@ interface Yard {
   };
 }
 
+interface Barn {
+  id: string;
+  name: string;
+  yard_id?: string;
+  active: boolean;
+  note?: string;
+  media_urls?: string[];
+  map_location?: {
+    lat: number;
+    lng: number;
+    address: string;
+  };
+  yards?: {
+    name: string;
+  };
+}
+
 const COUNTRIES = [
   'England',
   'Scotland',
@@ -57,12 +74,13 @@ const FARM_TYPES = [
 ];
 
 export function LocationsManager() {
-  const [activeTab, setActiveTab] = useState<'farms' | 'yards'>('farms');
+  const [activeTab, setActiveTab] = useState<'farms' | 'yards' | 'barns'>('farms');
   const [farms, setFarms] = useState<Farm[]>([]);
   const [yards, setYards] = useState<Yard[]>([]);
+  const [barns, setBarns] = useState<Barn[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<Farm | Yard | null>(null);
+  const [editingItem, setEditingItem] = useState<Farm | Yard | Barn | null>(null);
 
   const [farmFormData, setFarmFormData] = useState<Partial<Farm>>({
     name: '',
@@ -91,6 +109,15 @@ export function LocationsManager() {
     map_location: undefined
   });
 
+  const [barnFormData, setBarnFormData] = useState<Partial<Barn>>({
+    name: '',
+    yard_id: '',
+    active: true,
+    note: '',
+    media_urls: [],
+    map_location: undefined
+  });
+
   useEffect(() => {
     loadData();
   }, []);
@@ -102,9 +129,10 @@ export function LocationsManager() {
         'Authorization': `Bearer ${token}`
       };
 
-      const [farmsResponse, yardsResponse] = await Promise.all([
+      const [farmsResponse, yardsResponse, barnsResponse] = await Promise.all([
         fetch('/api/farms', { headers }),
-        fetch('/api/yards', { headers })
+        fetch('/api/yards', { headers }),
+        fetch('/api/barns', { headers })
       ]);
 
       if (farmsResponse.ok) {
@@ -115,6 +143,11 @@ export function LocationsManager() {
       if (yardsResponse.ok) {
         const yardsData = await yardsResponse.json();
         setYards(yardsData);
+      }
+
+      if (barnsResponse.ok) {
+        const barnsData = await barnsResponse.json();
+        setBarns(barnsData);
       }
     } catch (error) {
       console.error('Failed to load locations:', error);
@@ -197,8 +230,45 @@ export function LocationsManager() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: string, type: 'farms' | 'yards') => {
-    if (!confirm(`Are you sure you want to delete this ${type === 'farms' ? 'farm' : 'yard'}?`)) return;
+  const handleSubmitBarn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const url = editingItem
+        ? `/api/barns/${editingItem.id}`
+        : '/api/barns';
+      const method = editingItem ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
+        body: JSON.stringify(barnFormData)
+      });
+
+      if (response.ok) {
+        setIsModalOpen(false);
+        setEditingItem(null);
+        resetBarnForm();
+        loadData();
+      } else {
+        alert('Failed to save barn');
+      }
+    } catch (error) {
+      console.error('Failed to save barn:', error);
+      alert('Failed to save barn');
+    }
+  };
+
+  const handleEditBarn = (barn: Barn) => {
+    setEditingItem(barn);
+    setBarnFormData(barn);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async (id: string, type: 'farms' | 'yards' | 'barns') => {
+    if (!confirm(`Are you sure you want to delete this ${type === 'farms' ? 'farm' : type === 'yards' ? 'yard' : 'barn'}?`)) return;
 
     try {
       const response = await fetch(`/api/${type}/${id}`, {
@@ -250,12 +320,25 @@ export function LocationsManager() {
     });
   };
 
+  const resetBarnForm = () => {
+    setBarnFormData({
+      name: '',
+      yard_id: '',
+      active: true,
+      note: '',
+      media_urls: [],
+      map_location: undefined
+    });
+  };
+
   const handleAddNew = () => {
     setEditingItem(null);
     if (activeTab === 'farms') {
       resetFarmForm();
-    } else {
+    } else if (activeTab === 'yards') {
       resetYardForm();
+    } else {
+      resetBarnForm();
     }
     setIsModalOpen(true);
   };
@@ -469,6 +552,101 @@ export function LocationsManager() {
     </form>
   );
 
+  const renderBarnForm = () => (
+    <form onSubmit={handleSubmitBarn} className="space-y-4 max-h-[600px] overflow-y-auto px-1">
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Name *
+          </label>
+          <input
+            type="text"
+            required
+            value={barnFormData.name}
+            onChange={(e) => setBarnFormData({ ...barnFormData, name: e.target.value })}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Yard
+          </label>
+          <select
+            value={barnFormData.yard_id}
+            onChange={(e) => setBarnFormData({ ...barnFormData, yard_id: e.target.value })}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="">Select a yard...</option>
+            {yards.map(yard => (
+              <option key={yard.id} value={yard.id}>{yard.name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              checked={barnFormData.active}
+              onChange={(e) => setBarnFormData({ ...barnFormData, active: e.target.checked })}
+              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <span className="text-sm font-medium text-gray-700">Active</span>
+          </label>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Note
+          </label>
+          <textarea
+            value={barnFormData.note}
+            onChange={(e) => setBarnFormData({ ...barnFormData, note: e.target.value })}
+            rows={3}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            <ImageIcon className="inline mr-2" size={16} />
+            Media Images
+          </label>
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center text-gray-500">
+            <p className="text-sm">Media upload feature coming soon</p>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            <MapPin className="inline mr-2" size={16} />
+            Map Location
+          </label>
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center text-gray-500">
+            <p className="text-sm">Google Maps integration coming soon</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex gap-3 pt-4 sticky bottom-0 bg-white border-t border-gray-200 -mx-1 px-1 pb-1">
+        <button
+          type="button"
+          onClick={() => setIsModalOpen(false)}
+          className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          {editingItem ? 'Update' : 'Add'}
+        </button>
+      </div>
+    </form>
+  );
+
   const renderYardForm = () => (
     <form onSubmit={handleSubmitYard} className="space-y-4 max-h-[600px] overflow-y-auto px-1">
       <div className="space-y-4">
@@ -588,12 +766,22 @@ export function LocationsManager() {
           >
             Yard / Paddock
           </button>
+          <button
+            onClick={() => setActiveTab('barns')}
+            className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+              activeTab === 'barns'
+                ? 'border-teal-700 text-teal-700'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Barn
+          </button>
         </nav>
       </div>
 
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold text-gray-900">
-          {activeTab === 'farms' ? 'Farms & Locations' : 'Yards & Paddocks'}
+          {activeTab === 'farms' ? 'Farms & Locations' : activeTab === 'yards' ? 'Yards & Paddocks' : 'Barns'}
         </h2>
         <button
           onClick={handleAddNew}
@@ -674,7 +862,7 @@ export function LocationsManager() {
             </tbody>
           </table>
         </div>
-      ) : (
+      ) : activeTab === 'yards' ? (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
           <table className="min-w-full">
             <thead className="bg-gray-100">
@@ -732,14 +920,72 @@ export function LocationsManager() {
             </tbody>
           </table>
         </div>
+      ) : (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <table className="min-w-full">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Name
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Yard
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Active
+                </th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Edit
+                </th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Remove
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {barns.map((barn, index) => (
+                <tr
+                  key={barn.id}
+                  className={`${index % 2 === 0 ? 'bg-cyan-50' : 'bg-white'} hover:bg-gray-50 transition-colors`}
+                >
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {barn.name}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {barn.yards?.name || '-'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {barn.active ? 'Yes' : 'No'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <button
+                      onClick={() => handleEditBarn(barn)}
+                      className="text-blue-600 hover:text-blue-800 transition-colors inline-flex items-center justify-center"
+                    >
+                      <Edit2 size={18} />
+                    </button>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <button
+                      onClick={() => handleDelete(barn.id, 'barns')}
+                      className="text-red-600 hover:text-red-800 transition-colors inline-flex items-center justify-center"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingItem ? (activeTab === 'farms' ? 'Edit Farm' : 'Edit Yard') : (activeTab === 'farms' ? 'Add New Farm' : 'Add New Yard')}
+        title={editingItem ? (activeTab === 'farms' ? 'Edit Farm' : activeTab === 'yards' ? 'Edit Yard' : 'Edit Barn') : (activeTab === 'farms' ? 'Add New Farm' : activeTab === 'yards' ? 'Add New Yard' : 'Add New Barn')}
       >
-        {activeTab === 'farms' ? renderFarmForm() : renderYardForm()}
+        {activeTab === 'farms' ? renderFarmForm() : activeTab === 'yards' ? renderYardForm() : renderBarnForm()}
       </Modal>
     </div>
   );

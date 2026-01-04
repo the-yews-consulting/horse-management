@@ -17,6 +17,7 @@ import haIntegrationRoutes from './routes/ha-integration.mjs';
 import horseListsRoutes from './routes/horse-lists.mjs';
 import farmsRoutes from './routes/farms.mjs';
 import yardsRoutes from './routes/yards.mjs';
+import barnsRoutes from './routes/barns.mjs';
 import floorplansRoutes from './routes/floorplans.mjs';
 import mediaRoutes from './routes/media.mjs';
 import { dbReady } from './database.mjs';
@@ -45,6 +46,7 @@ app.use('/api/ha-integration', haIntegrationRoutes);
 app.use('/api/horse-lists', horseListsRoutes);
 app.use('/api/farms', farmsRoutes);
 app.use('/api/yards', yardsRoutes);
+app.use('/api/barns', barnsRoutes);
 app.use('/api/floorplans', floorplansRoutes);
 app.use('/api/horses', mediaRoutes);
 
