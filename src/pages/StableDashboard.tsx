@@ -1,4 +1,4 @@
-import { Activity, Building2, Users } from 'lucide-react';
+import { Activity, HousePlus, Users } from 'lucide-react';
 import { HorseHead } from '../components/HorseHeadIcon';
 
 export function StableDashboard() {
@@ -26,7 +26,7 @@ export function StableDashboard() {
               <p className="text-sm font-medium text-gray-600">Total Stalls</p>
               <p className="text-3xl font-bold text-gray-900 mt-2">0</p>
             </div>
-            <Building2 className="h-12 w-12 text-blue-600 opacity-80" />
+            <HousePlus className="h-12 w-12 text-blue-600 opacity-80" />
           </div>
         </div>
 

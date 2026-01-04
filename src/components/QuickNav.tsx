@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Building2, Users } from 'lucide-react';
+import { HousePlus, Users } from 'lucide-react';
 import { HorseHead } from './HorseHeadIcon';
 
 export function QuickNav() {
@@ -7,7 +7,7 @@ export function QuickNav() {
 
   const tabs = [
     { name: 'Horses', href: '/horses', icon: HorseHead },
-    { name: 'Stalls', href: '/stalls', icon: Building2 },
+    { name: 'Stalls', href: '/stalls', icon: HousePlus },
     { name: 'Owners', href: '/owners', icon: Users },
   ];
 

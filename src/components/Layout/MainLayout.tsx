@@ -3,7 +3,7 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   LayoutDashboard,
-  Building2,
+  HousePlus,
   Users,
   Activity,
   Stethoscope,
@@ -25,7 +25,7 @@ export function MainLayout() {
   const navigation = [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard, roles: ['admin', 'staff', 'owner'] },
     { name: 'Horses', href: '/horses', icon: HorseHead, roles: ['admin', 'staff', 'owner'] },
-    { name: 'Stalls', href: '/stalls', icon: Building2, roles: ['admin', 'staff'] },
+    { name: 'Stalls', href: '/stalls', icon: HousePlus, roles: ['admin', 'staff'] },
     { name: 'Owners', href: '/owners', icon: Users, roles: ['admin', 'staff'] },
     { name: 'Vets & Farriers', href: '/vets-farriers', icon: Stethoscope, roles: ['admin', 'staff'] },
     { name: 'Whiteboard', href: '/whiteboard', icon: Calendar, roles: ['admin', 'staff'] },
