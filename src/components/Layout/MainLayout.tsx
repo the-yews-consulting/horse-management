@@ -3,7 +3,6 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   LayoutDashboard,
-  PawPrint,
   Building2,
   Users,
   Activity,
@@ -16,6 +15,7 @@ import {
   LogOut,
   User
 } from 'lucide-react';
+import { horseHead as HorseHead } from '@lucide/lab';
 
 export function MainLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -24,7 +24,7 @@ export function MainLayout() {
 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard, roles: ['admin', 'staff', 'owner'] },
-    { name: 'Horses', href: '/horses', icon: Pawprint, roles: ['admin', 'staff', 'owner'] },
+    { name: 'Horses', href: '/horses', icon: HorseHead, roles: ['admin', 'staff', 'owner'] },
     { name: 'Stalls', href: '/stalls', icon: Building2, roles: ['admin', 'staff'] },
     { name: 'Owners', href: '/owners', icon: Users, roles: ['admin', 'staff'] },
     { name: 'Vets & Farriers', href: '/vets-farriers', icon: Stethoscope, roles: ['admin', 'staff'] },

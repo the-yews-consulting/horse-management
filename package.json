@@ -14,6 +14,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
   "dependencies": {
+    "@lucide/lab": "^0.1.2",
     "@supabase/supabase-js": "^2.57.4",
     "bcryptjs": "^3.0.3",
     "body-parser": "^2.2.1",
