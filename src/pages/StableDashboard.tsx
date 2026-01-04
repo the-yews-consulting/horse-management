@@ -1,4 +1,4 @@
-import { Activity, Users } from 'lucide-react';
+import { ActivitySquare, Users } from 'lucide-react';
 import { house as HousePlus } from '@lucide/lab';
 import { HorseHead } from '../components/HorseHeadIcon';
 
@@ -47,7 +47,7 @@ export function StableDashboard() {
               <p className="text-sm font-medium text-gray-600">Occupancy Rate</p>
               <p className="text-3xl font-bold text-gray-900 mt-2">0%</p>
             </div>
-            <Activity className="h-12 w-12 text-orange-600 opacity-80" />
+            <ActivitySquare className="h-12 w-12 text-orange-600 opacity-80" />
           </div>
         </div>
       </div>

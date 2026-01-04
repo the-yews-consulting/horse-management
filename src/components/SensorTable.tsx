@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { HassEntity } from '../types/homeassistant';
 import { getEntityName, formatSensorValue, getEntityDomain } from '../utils/entityHelpers';
-import { Activity, Clock, Search } from 'lucide-react';
+import { ActivitySquare, Clock, Search } from 'lucide-react';
 
 interface SensorTableProps {
   sensors: HassEntity[];
@@ -76,7 +76,7 @@ export function SensorTable({ sensors }: SensorTableProps) {
   if (sensors.length === 0) {
     return (
       <div className="bg-white rounded-xl shadow-sm p-12 text-center">
-        <Activity className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+        <ActivitySquare className="h-16 w-16 text-gray-400 mx-auto mb-4" />
         <h3 className="text-xl font-semibold text-gray-900 mb-2">No Sensors Found</h3>
         <p className="text-gray-600">No sensor entities available in your Home Assistant instance</p>
       </div>

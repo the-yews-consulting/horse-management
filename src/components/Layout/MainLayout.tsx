@@ -4,7 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import {
   LayoutDashboard,
   Users,
-  Activity,
+  ActivitySquare,
   Stethoscope,
   Calendar,
   Home,
@@ -62,7 +62,7 @@ export function MainLayout() {
           <div className="flex flex-col h-full">
             <div className="flex items-center justify-between p-4 border-b">
               <div className="flex items-center space-x-2">
-                <Activity className="h-8 w-8 text-green-600" />
+                <ActivitySquare className="h-8 w-8 text-green-600" />
                 <span className="text-xl font-bold text-gray-800">StableManager</span>
               </div>
               <button
@@ -125,7 +125,7 @@ export function MainLayout() {
                 <Menu className="h-6 w-6" />
               </button>
               <div className="flex items-center space-x-2">
-                <Activity className="h-6 w-6 text-green-600" />
+                <ActivitySquare className="h-6 w-6 text-green-600" />
                 <span className="text-lg font-bold text-gray-800">StableManager</span>
               </div>
               <div className="w-6" />
