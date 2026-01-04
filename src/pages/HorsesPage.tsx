@@ -80,7 +80,7 @@ export function HorsesPage() {
     try {
       const response = await fetch('/api/horse-lists/breeds', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }
       });
       if (response.ok) {
@@ -99,7 +99,7 @@ export function HorsesPage() {
     try {
       const response = await fetch('/api/horse-lists/colours', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }
       });
       if (response.ok) {
@@ -118,7 +118,7 @@ export function HorsesPage() {
     try {
       const response = await fetch('/api/horse-lists/genders', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }
       });
       if (response.ok) {
