@@ -17,6 +17,7 @@ import haIntegrationRoutes from './routes/ha-integration.mjs';
 import horseListsRoutes from './routes/horse-lists.mjs';
 import farmsRoutes from './routes/farms.mjs';
 import yardsRoutes from './routes/yards.mjs';
+import floorplansRoutes from './routes/floorplans.mjs';
 import { dbReady } from './database.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -43,6 +44,7 @@ app.use('/api/ha-integration', haIntegrationRoutes);
 app.use('/api/horse-lists', horseListsRoutes);
 app.use('/api/farms', farmsRoutes);
 app.use('/api/yards', yardsRoutes);
+app.use('/api/floorplans', floorplansRoutes);
 
 app.use(express.static(path.join(__dirname, '../dist')));
 

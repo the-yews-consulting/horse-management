@@ -591,3 +591,86 @@ export async function deleteActivity(id: string): Promise<{ success: boolean }> 
 
   return await response.json();
 }
+
+export interface FloorplanItem {
+  id: string;
+  type: 'single-stall' | 'double-horizontal' | 'double-vertical' | 'storage' | 'tack-room';
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rotation: 0 | 90 | 180 | 270;
+  label?: string;
+}
+
+export interface Floorplan {
+  id?: string;
+  name: string;
+  description?: string;
+  layout_data: FloorplanItem[];
+  created_by?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export async function getFloorplans(): Promise<Floorplan[]> {
+  const response = await fetch(`${API_BASE_URL}/floorplans`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch floorplans');
+  }
+  return await response.json();
+}
+
+export async function getFloorplan(id: string): Promise<Floorplan> {
+  const response = await fetch(`${API_BASE_URL}/floorplans/${id}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch floorplan');
+  }
+  return await response.json();
+}
+
+export async function createFloorplan(floorplan: Floorplan): Promise<Floorplan> {
+  const response = await fetch(`${API_BASE_URL}/floorplans`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(floorplan),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to create floorplan');
+  }
+
+  return await response.json();
+}
+
+export async function updateFloorplan(id: string, floorplan: Floorplan): Promise<Floorplan> {
+  const response = await fetch(`${API_BASE_URL}/floorplans/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(floorplan),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to update floorplan');
+  }
+
+  return await response.json();
+}
+
+export async function deleteFloorplan(id: string): Promise<{ success: boolean }> {
+  const response = await fetch(`${API_BASE_URL}/floorplans/${id}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to delete floorplan');
+  }
+
+  return await response.json();
+}

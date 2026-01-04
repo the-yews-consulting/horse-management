@@ -1,14 +1,18 @@
 import { useEffect, useState } from 'react';
-import { Plus, Edit, Trash2 } from 'lucide-react';
-import { getStalls, createStall, updateStall, deleteStall, Stall } from '../services/api';
+import { Plus, Edit, Trash2, LayoutGrid, List } from 'lucide-react';
+import { getStalls, createStall, updateStall, deleteStall, Stall, getFloorplans, createFloorplan, updateFloorplan, Floorplan, FloorplanItem } from '../services/api';
 import { Modal } from '../components/Modal';
 import { QuickNav } from '../components/QuickNav';
+import FloorplanEditor from '../components/FloorplanEditor';
 
 export function StallsPage() {
   const [stalls, setStalls] = useState<Stall[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStall, setEditingStall] = useState<Stall | null>(null);
+  const [viewMode, setViewMode] = useState<'list' | 'floorplan'>('list');
+  const [floorplans, setFloorplans] = useState<Floorplan[]>([]);
+  const [currentFloorplan, setCurrentFloorplan] = useState<Floorplan | null>(null);
   const [formData, setFormData] = useState<Partial<Stall>>({
     name: '',
     building: '',
@@ -21,6 +25,7 @@ export function StallsPage() {
 
   useEffect(() => {
     loadStalls();
+    loadFloorplans();
   }, []);
 
   const loadStalls = async () => {
@@ -31,6 +36,43 @@ export function StallsPage() {
       console.error('Failed to load stalls:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadFloorplans = async () => {
+    try {
+      const data = await getFloorplans();
+      setFloorplans(data);
+      if (data.length > 0) {
+        setCurrentFloorplan(data[0]);
+      }
+    } catch (error) {
+      console.error('Failed to load floorplans:', error);
+    }
+  };
+
+  const handleSaveFloorplan = async (items: FloorplanItem[]) => {
+    try {
+      if (currentFloorplan?.id) {
+        const updated = await updateFloorplan(currentFloorplan.id, {
+          ...currentFloorplan,
+          layout_data: items,
+        });
+        setCurrentFloorplan(updated);
+        alert('Floorplan saved successfully!');
+      } else {
+        const newFloorplan = await createFloorplan({
+          name: 'Stable Layout',
+          description: 'Main stable floorplan',
+          layout_data: items,
+        });
+        setCurrentFloorplan(newFloorplan);
+        loadFloorplans();
+        alert('Floorplan created and saved successfully!');
+      }
+    } catch (error) {
+      console.error('Failed to save floorplan:', error);
+      alert('Failed to save floorplan. Please try again.');
     }
   };
 
@@ -116,16 +158,49 @@ export function StallsPage() {
           <h1 className="text-3xl font-bold text-gray-900">Stables</h1>
           <p className="text-gray-600 mt-1">Manage your stables and assignments</p>
         </div>
-        <button
-          onClick={handleAddNew}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <Plus size={20} />
-          Add Stable
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="flex bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => setViewMode('list')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                viewMode === 'list'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <List size={20} />
+              List
+            </button>
+            <button
+              onClick={() => setViewMode('floorplan')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                viewMode === 'floorplan'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <LayoutGrid size={20} />
+              Floorplan
+            </button>
+          </div>
+          {viewMode === 'list' && (
+            <button
+              onClick={handleAddNew}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <Plus size={20} />
+              Add Stable
+            </button>
+          )}
+        </div>
       </div>
 
-      {stalls.length === 0 ? (
+      {viewMode === 'floorplan' ? (
+        <FloorplanEditor
+          onSave={handleSaveFloorplan}
+          initialItems={currentFloorplan?.layout_data || []}
+        />
+      ) : stalls.length === 0 ? (
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 text-center">
           <p className="text-gray-500">No stables added yet. Add your first stable to get started.</p>
         </div>
