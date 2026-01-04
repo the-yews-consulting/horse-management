@@ -16,6 +16,7 @@ import {
   LogOut,
   User
 } from 'lucide-react';
+import { horseHead } from '@lucide/lab';
 
 export function MainLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
