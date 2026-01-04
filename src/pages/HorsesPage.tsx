@@ -3,6 +3,7 @@ import { Plus, Edit, Trash2 } from 'lucide-react';
 import { getHorses, createHorse, updateHorse, deleteHorse, getOwners, Horse, Owner } from '../services/api';
 import { Modal } from '../components/Modal';
 import { QuickNav } from '../components/QuickNav';
+import HorseMarkingsEditor from '../components/HorseMarkingsEditor';
 
 interface ListItem {
   id: string;
@@ -46,6 +47,7 @@ export function HorsesPage() {
     training_notes: '',
     video_urls: '',
     related_links: '',
+    markings_image: '',
   });
 
   useEffect(() => {
@@ -339,6 +341,7 @@ export function HorsesPage() {
             <nav className="-mb-px flex space-x-4 overflow-x-auto">
               {[
                 { id: 'basic', label: 'Basic Info' },
+                { id: 'markings', label: 'Markings' },
                 { id: 'diet', label: 'Diet' },
                 { id: 'ownership', label: 'Ownership' },
                 { id: 'pedigree', label: 'Pedigree' },
@@ -546,6 +549,19 @@ export function HorsesPage() {
                     />
                   </div>
                 </div>
+              </div>
+            )}
+
+            {activeTab === 'markings' && (
+              <div className="space-y-4">
+                <HorseMarkingsEditor
+                  initialImage={formData.markings_image}
+                  onSave={(imageDataUrl) => {
+                    setFormData({ ...formData, markings_image: imageDataUrl });
+                    setActiveTab('basic');
+                  }}
+                  onCancel={() => setActiveTab('basic')}
+                />
               </div>
             )}
 

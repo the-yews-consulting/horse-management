@@ -128,6 +128,7 @@ export interface Horse {
   owner_last_name?: string;
   vet_name?: string;
   farrier_name?: string;
+  markings_image?: string;
   created_at?: string;
   updated_at?: string;
 }
