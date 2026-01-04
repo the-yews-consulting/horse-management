@@ -1,71 +1,88 @@
 import express from 'express';
-import {
-  getAllStalls,
-  getStallById,
-  createStall,
-  updateStall,
-  deleteStall,
-  getActiveAssignmentsByStallId,
-  getSensorsByStallId,
-  getCamerasByStallId
-} from '../database.mjs';
-import { authenticateToken, requireRole } from '../middleware/auth.mjs';
+import { supabase } from '../supabase.mjs';
+import { authenticateToken } from '../middleware/auth.mjs';
 
 const router = express.Router();
 
-router.use(authenticateToken);
-
-router.get('/', async (req, res) => {
+router.get('/', authenticateToken, async (req, res) => {
   try {
-    const stalls = await getAllStalls();
-    res.json(stalls);
+    const { data, error } = await supabase
+      .from('stalls')
+      .select('*, barns(name), yards(name)')
+      .order('name');
+
+    if (error) throw error;
+    res.json(data || []);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error fetching stalls:', error);
+    res.status(500).json({ error: 'Failed to fetch stalls' });
   }
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', authenticateToken, async (req, res) => {
   try {
-    const stall = await getStallById(req.params.id);
-    if (!stall) {
+    const { data, error } = await supabase
+      .from('stalls')
+      .select('*, barns(name), yards(name)')
+      .eq('id', req.params.id)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!data) {
       return res.status(404).json({ error: 'Stall not found' });
     }
-
-    const assignments = await getActiveAssignmentsByStallId(req.params.id);
-    const sensors = await getSensorsByStallId(req.params.id);
-    const cameras = await getCamerasByStallId(req.params.id);
-
-    res.json({ ...stall, assignments, sensors, cameras });
+    res.json(data);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error fetching stall:', error);
+    res.status(500).json({ error: 'Failed to fetch stall' });
   }
 });
 
-router.post('/', requireRole('admin', 'staff'), async (req, res) => {
+router.post('/', authenticateToken, async (req, res) => {
   try {
-    const stall = await createStall(req.body);
-    res.status(201).json(stall);
+    const { data, error } = await supabase
+      .from('stalls')
+      .insert([req.body])
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.status(201).json(data);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error('Error creating stall:', error);
+    res.status(500).json({ error: 'Failed to create stall' });
   }
 });
 
-router.put('/:id', requireRole('admin', 'staff'), async (req, res) => {
+router.put('/:id', authenticateToken, async (req, res) => {
   try {
-    await updateStall(req.params.id, req.body);
-    const stall = await getStallById(req.params.id);
-    res.json(stall);
+    const { data, error } = await supabase
+      .from('stalls')
+      .update({ ...req.body, updated_at: new Date().toISOString() })
+      .eq('id', req.params.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.json(data);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error('Error updating stall:', error);
+    res.status(500).json({ error: 'Failed to update stall' });
   }
 });
 
-router.delete('/:id', requireRole('admin', 'staff'), async (req, res) => {
+router.delete('/:id', authenticateToken, async (req, res) => {
   try {
-    await deleteStall(req.params.id);
-    res.json({ success: true });
+    const { error } = await supabase
+      .from('stalls')
+      .delete()
+      .eq('id', req.params.id);
+
+    if (error) throw error;
+    res.status(204).send();
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error deleting stall:', error);
+    res.status(500).json({ error: 'Failed to delete stall' });
   }
 });
 

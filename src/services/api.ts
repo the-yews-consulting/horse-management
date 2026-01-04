@@ -137,6 +137,8 @@ export interface Stall {
   id?: string;
   name: string;
   building?: string;
+  barn_id?: string;
+  paddock_id?: string;
   size_sqm?: number;
   has_paddock_access?: boolean;
   features?: string;
@@ -144,6 +146,12 @@ export interface Stall {
   notes?: string;
   created_at?: string;
   updated_at?: string;
+  barns?: {
+    name: string;
+  };
+  yards?: {
+    name: string;
+  };
 }
 
 export interface Owner {

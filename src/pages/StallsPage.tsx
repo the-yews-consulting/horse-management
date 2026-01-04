@@ -5,8 +5,20 @@ import { Modal } from '../components/Modal';
 import { QuickNav } from '../components/QuickNav';
 import FloorplanEditor from '../components/FloorplanEditor';
 
+interface Barn {
+  id: string;
+  name: string;
+}
+
+interface Yard {
+  id: string;
+  name: string;
+}
+
 export function StallsPage() {
   const [stalls, setStalls] = useState<Stall[]>([]);
+  const [barns, setBarns] = useState<Barn[]>([]);
+  const [yards, setYards] = useState<Yard[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStall, setEditingStall] = useState<Stall | null>(null);
@@ -15,7 +27,8 @@ export function StallsPage() {
   const [currentFloorplan, setCurrentFloorplan] = useState<Floorplan | null>(null);
   const [formData, setFormData] = useState<Partial<Stall>>({
     name: '',
-    building: '',
+    barn_id: '',
+    paddock_id: '',
     size_sqm: undefined,
     has_paddock_access: false,
     features: '',
@@ -26,6 +39,8 @@ export function StallsPage() {
   useEffect(() => {
     loadStalls();
     loadFloorplans();
+    loadBarns();
+    loadYards();
   }, []);
 
   const loadStalls = async () => {
@@ -36,6 +51,40 @@ export function StallsPage() {
       console.error('Failed to load stalls:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadBarns = async () => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch('/api/barns', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setBarns(data);
+      }
+    } catch (error) {
+      console.error('Failed to load barns:', error);
+    }
+  };
+
+  const loadYards = async () => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch('/api/yards', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setYards(data);
+      }
+    } catch (error) {
+      console.error('Failed to load yards:', error);
     }
   };
 
@@ -123,7 +172,8 @@ export function StallsPage() {
     setEditingStall(null);
     setFormData({
       name: '',
-      building: '',
+      barn_id: '',
+      paddock_id: '',
       size_sqm: undefined,
       has_paddock_access: false,
       features: '',
@@ -213,13 +263,13 @@ export function StallsPage() {
                   Name
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Building
+                  Barn
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Size (m²)
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Paddock Access
+                  Paddock
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
@@ -236,13 +286,13 @@ export function StallsPage() {
                     {stall.name}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {stall.building || '-'}
+                    {stall.barns?.name || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {stall.size_sqm || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {stall.has_paddock_access ? 'Yes' : 'No'}
+                    {stall.has_paddock_access ? (stall.yards?.name || 'Yes') : 'No'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(stall.status)}`}>
@@ -294,14 +344,18 @@ export function StallsPage() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Building
+                Barn
               </label>
-              <input
-                type="text"
-                value={formData.building || ''}
-                onChange={(e) => setFormData({ ...formData, building: e.target.value })}
+              <select
+                value={formData.barn_id || ''}
+                onChange={(e) => setFormData({ ...formData, barn_id: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+              >
+                <option value="">Select a barn...</option>
+                {barns.map(barn => (
+                  <option key={barn.id} value={barn.id}>{barn.name}</option>
+                ))}
+              </select>
             </div>
 
             <div>
@@ -339,13 +393,31 @@ export function StallsPage() {
                 <input
                   type="checkbox"
                   checked={formData.has_paddock_access || false}
-                  onChange={(e) => setFormData({ ...formData, has_paddock_access: e.target.checked })}
+                  onChange={(e) => setFormData({ ...formData, has_paddock_access: e.target.checked, paddock_id: e.target.checked ? formData.paddock_id : '' })}
                   className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
                 />
                 <span className="ml-2 text-sm font-medium text-gray-700">Has Paddock Access</span>
               </label>
             </div>
           </div>
+
+          {formData.has_paddock_access && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Paddock
+              </label>
+              <select
+                value={formData.paddock_id || ''}
+                onChange={(e) => setFormData({ ...formData, paddock_id: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">Select a paddock...</option>
+                {yards.map(yard => (
+                  <option key={yard.id} value={yard.id}>{yard.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
