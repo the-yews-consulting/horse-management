@@ -15,6 +15,7 @@ import {
   Redo,
   PaintBucket
 } from 'lucide-react';
+import horseTemplateImage from '../assets/image.png';
 
 interface HorseMarkingsEditorProps {
   initialImage?: string;
@@ -72,179 +73,40 @@ export default function HorseMarkingsEditor({
 
     fabricCanvasRef.current = canvas;
 
-    addHorseOutlines(canvas);
+    fabric.Image.fromURL(horseTemplateImage, (img) => {
+      if (!img) return;
 
-    if (initialImage) {
-      fabric.Image.fromURL(initialImage, (img) => {
-        img.selectable = false;
-        canvas.add(img);
-        canvas.renderAll();
+      img.set({
+        left: 0,
+        top: 0,
+        selectable: false,
+        evented: false
       });
-    }
+
+      const scale = Math.min(
+        canvas.width! / img.width!,
+        canvas.height! / img.height!
+      );
+
+      img.scale(scale);
+
+      canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
+
+      if (initialImage) {
+        fabric.Image.fromURL(initialImage, (savedImg) => {
+          if (savedImg) {
+            savedImg.selectable = false;
+            canvas.add(savedImg);
+            canvas.renderAll();
+          }
+        });
+      }
+    });
 
     return () => {
       canvas.dispose();
     };
-  }, []);
-
-  const addHorseOutlines = (canvas: fabric.Canvas) => {
-    const outlineColor = '#000000';
-    const outlineWidth = 2;
-
-    const leftHorseProfile = createHorseProfile(100, 150, false);
-    const rightHorseProfile = createHorseProfile(600, 150, true);
-    const frontHead = createFrontHead(350, 150);
-    const hindLegs = createHindLegs(300, 500);
-    const frontLegs = createFrontLegs(600, 500);
-
-    [leftHorseProfile, rightHorseProfile, frontHead, hindLegs, frontLegs].forEach(group => {
-      group.selectable = false;
-      group.evented = false;
-      canvas.add(group);
-    });
-
-    canvas.renderAll();
-  };
-
-  const createHorseProfile = (x: number, y: number, mirrored: boolean) => {
-    const scaleX = mirrored ? -1 : 1;
-
-    const body = new fabric.Ellipse({
-      left: 0,
-      top: 50,
-      rx: 80,
-      ry: 50,
-      fill: 'transparent',
-      stroke: '#000000',
-      strokeWidth: 2
-    });
-
-    const neck = new fabric.Path('M 0 30 Q -20 10 -30 -20', {
-      fill: 'transparent',
-      stroke: '#000000',
-      strokeWidth: 2
-    });
-
-    const head = new fabric.Path('M -30 -20 L -35 -40 L -30 -50 L -20 -48 L -18 -30 Z', {
-      fill: 'transparent',
-      stroke: '#000000',
-      strokeWidth: 2
-    });
-
-    const legs = [
-      new fabric.Line([10, 100, 10, 170], { stroke: '#000000', strokeWidth: 2 }),
-      new fabric.Line([40, 100, 40, 170], { stroke: '#000000', strokeWidth: 2 }),
-      new fabric.Line([60, 100, 60, 170], { stroke: '#000000', strokeWidth: 2 }),
-      new fabric.Line([90, 100, 90, 170], { stroke: '#000000', strokeWidth: 2 })
-    ];
-
-    const tail = new fabric.Path('M 80 80 Q 100 90 110 120', {
-      fill: 'transparent',
-      stroke: '#000000',
-      strokeWidth: 2
-    });
-
-    const group = new fabric.Group([body, neck, head, ...legs, tail], {
-      left: x,
-      top: y,
-      scaleX: scaleX
-    });
-
-    return group;
-  };
-
-  const createFrontHead = (x: number, y: number) => {
-    const head = new fabric.Ellipse({
-      left: 0,
-      top: 0,
-      rx: 40,
-      ry: 60,
-      fill: 'transparent',
-      stroke: '#000000',
-      strokeWidth: 2
-    });
-
-    const centerLine = new fabric.Line([0, -60, 0, 60], {
-      stroke: '#000000',
-      strokeWidth: 1,
-      strokeDashArray: [5, 5]
-    });
-
-    const nose = new fabric.Ellipse({
-      left: -15,
-      top: 40,
-      rx: 15,
-      ry: 20,
-      fill: 'transparent',
-      stroke: '#000000',
-      strokeWidth: 2
-    });
-
-    const group = new fabric.Group([head, centerLine, nose], {
-      left: x,
-      top: y
-    });
-
-    return group;
-  };
-
-  const createHindLegs = (x: number, y: number) => {
-    const leftLeg = new fabric.Path('M 0 0 L -5 40 L -5 80 L -3 100 L 0 100', {
-      fill: 'transparent',
-      stroke: '#000000',
-      strokeWidth: 2
-    });
-
-    const rightLeg = new fabric.Path('M 30 0 L 35 40 L 35 80 L 33 100 L 30 100', {
-      fill: 'transparent',
-      stroke: '#000000',
-      strokeWidth: 2
-    });
-
-    const hindquarters = new fabric.Ellipse({
-      left: 0,
-      top: -30,
-      rx: 30,
-      ry: 40,
-      fill: 'transparent',
-      stroke: '#000000',
-      strokeWidth: 2
-    });
-
-    const group = new fabric.Group([hindquarters, leftLeg, rightLeg], {
-      left: x,
-      top: y
-    });
-
-    return group;
-  };
-
-  const createFrontLegs = (x: number, y: number) => {
-    const leftLeg = new fabric.Path('M 0 0 L 0 80 L 2 100', {
-      fill: 'transparent',
-      stroke: '#000000',
-      strokeWidth: 2
-    });
-
-    const rightLeg = new fabric.Path('M 30 0 L 30 80 L 28 100', {
-      fill: 'transparent',
-      stroke: '#000000',
-      strokeWidth: 2
-    });
-
-    const chest = new fabric.Path('M 0 -20 Q 15 -30 30 -20', {
-      fill: 'transparent',
-      stroke: '#000000',
-      strokeWidth: 2
-    });
-
-    const group = new fabric.Group([chest, leftLeg, rightLeg], {
-      left: x,
-      top: y
-    });
-
-    return group;
-  };
+  }, [initialImage]);
 
   const selectTool = (tool: string) => {
     const canvas = fabricCanvasRef.current;
