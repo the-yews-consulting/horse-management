@@ -1,4 +1,5 @@
 import { supabase } from './supabase.mjs';
+import crypto from 'crypto';
 
 const dbReady = Promise.resolve();
 export { dbReady };
@@ -789,6 +790,56 @@ export async function getActiveAssignmentByHorseId(horseId) {
     };
   }
   return null;
+}
+
+export async function linkSensorToStall(sensor) {
+  const { data, error } = await supabase
+    .from('ha_sensors')
+    .insert({
+      entity_id: sensor.entity_id,
+      friendly_name: sensor.friendly_name,
+      device_class: sensor.device_class,
+      unit_of_measurement: sensor.unit_of_measurement,
+      state: sensor.state,
+      attributes: sensor.attributes || {}
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getSensorsByStallId(stallId) {
+  const { data, error } = await supabase
+    .from('ha_sensors')
+    .select('*')
+    .order('friendly_name', { ascending: true });
+
+  if (error) throw error;
+  return data;
+}
+
+export async function unlinkSensor(id) {
+  const { error } = await supabase
+    .from('ha_sensors')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw error;
+  return true;
+}
+
+export async function linkCameraToStall(camera) {
+  return { id: crypto.randomUUID(), ...camera };
+}
+
+export async function getCamerasByStallId(stallId) {
+  return [];
+}
+
+export async function unlinkCamera(id) {
+  return true;
 }
 
 export const db = null;
