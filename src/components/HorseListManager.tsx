@@ -40,7 +40,7 @@ export function HorseListManager({ listType, title }: HorseListManagerProps) {
 
   const loadItems = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('auth_token');
 
       const response = await fetch(`/api/horse-lists/${listType}`, {
         headers: {
@@ -83,7 +83,7 @@ export function HorseListManager({ listType, title }: HorseListManagerProps) {
         method,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         },
         body: JSON.stringify(formData)
       });
@@ -122,7 +122,7 @@ export function HorseListManager({ listType, title }: HorseListManagerProps) {
       const response = await fetch(`/api/horse-lists/${listType}/${id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         }
       });
 
