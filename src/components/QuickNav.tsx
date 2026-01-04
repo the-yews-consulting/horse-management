@@ -1,12 +1,11 @@
 import { Link, useLocation } from 'react-router-dom';
 import { PawPrint, Building2, Users } from 'lucide-react';
-import { horseHead } from '@lucide/lab';
 
 export function QuickNav() {
   const location = useLocation();
 
   const tabs = [
-    { name: 'Horses', href: '/horses', icon: horseHead },
+    { name: 'Horses', href: '/horses', icon: PawPrint },
     { name: 'Stalls', href: '/stalls', icon: Building2 },
     { name: 'Owners', href: '/owners', icon: Users },
   ];
