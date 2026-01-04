@@ -65,7 +65,7 @@ export function StableDashboard() {
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Total Stalls</p>
+              <p className="text-sm font-medium text-gray-600">Total Stables</p>
               <p className="text-3xl font-bold text-gray-900 mt-2">
                 {loading ? '...' : stats.stalls}
               </p>
