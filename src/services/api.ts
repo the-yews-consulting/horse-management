@@ -190,7 +190,11 @@ export interface Farrier {
 }
 
 export async function getHorses(): Promise<Horse[]> {
-  const response = await fetch(`${API_BASE_URL}/horses`);
+  const response = await fetch(`${API_BASE_URL}/horses`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+    }
+  });
   if (!response.ok) {
     throw new Error('Failed to fetch horses');
   }
@@ -198,7 +202,11 @@ export async function getHorses(): Promise<Horse[]> {
 }
 
 export async function getHorse(id: string): Promise<Horse> {
-  const response = await fetch(`${API_BASE_URL}/horses/${id}`);
+  const response = await fetch(`${API_BASE_URL}/horses/${id}`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+    }
+  });
   if (!response.ok) {
     throw new Error('Failed to fetch horse');
   }
@@ -210,6 +218,7 @@ export async function createHorse(horse: Horse): Promise<Horse> {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
     },
     body: JSON.stringify(horse),
   });
@@ -227,6 +236,7 @@ export async function updateHorse(id: string, horse: Horse): Promise<Horse> {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
     },
     body: JSON.stringify(horse),
   });
@@ -242,6 +252,9 @@ export async function updateHorse(id: string, horse: Horse): Promise<Horse> {
 export async function deleteHorse(id: string): Promise<{ success: boolean }> {
   const response = await fetch(`${API_BASE_URL}/horses/${id}`, {
     method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+    }
   });
 
   if (!response.ok) {
