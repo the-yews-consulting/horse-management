@@ -1,4 +1,5 @@
 import { Activity, PawPrint, Building2, Users, Warehouse } from 'lucide-react';
+import { HorseHead } from '../components/HorseHeadIcon';
 
 export function StableDashboard() {
   return (
