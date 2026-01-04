@@ -12,9 +12,9 @@ import {
   Menu,
   X,
   LogOut,
-  User
+  User,
+  Warehouse
 } from 'lucide-react';
-import { House as HousePlus } from '../HouseIcon';
 import { HorseHead } from '../HorseHeadIcon';
 
 export function MainLayout() {
@@ -25,7 +25,7 @@ export function MainLayout() {
   const navigation = [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard, roles: ['admin', 'staff', 'owner'] },
     { name: 'Horses', href: '/horses', icon: HorseHead, roles: ['admin', 'staff', 'owner'] },
-    { name: 'Stalls', href: '/stalls', icon: HousePlus, roles: ['admin', 'staff'] },
+    { name: 'Stalls', href: '/stalls', icon: Warehouse, roles: ['admin', 'staff'] },
     { name: 'Owners', href: '/owners', icon: Users, roles: ['admin', 'staff'] },
     { name: 'Vets & Farriers', href: '/vets-farriers', icon: Stethoscope, roles: ['admin', 'staff'] },
     { name: 'Whiteboard', href: '/whiteboard', icon: Calendar, roles: ['admin', 'staff'] },
