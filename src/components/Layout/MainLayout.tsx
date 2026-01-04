@@ -25,7 +25,7 @@ export function MainLayout() {
   const navigation = [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard, roles: ['super_admin', 'admin', 'staff', 'owner'] },
     { name: 'Horses', href: '/horses', icon: HorseHead, roles: ['super_admin', 'admin', 'staff', 'owner'] },
-    { name: 'Stalls', href: '/stalls', icon: Warehouse, roles: ['super_admin', 'admin', 'staff'] },
+    { name: 'Stables', href: '/stalls', icon: Warehouse, roles: ['super_admin', 'admin', 'staff'] },
     { name: 'Owners', href: '/owners', icon: Users, roles: ['super_admin', 'admin', 'staff'] },
     { name: 'Vets & Farriers', href: '/vets-farriers', icon: Stethoscope, roles: ['super_admin', 'admin', 'staff'] },
     { name: 'Whiteboard', href: '/whiteboard', icon: Calendar, roles: ['super_admin', 'admin', 'staff'] },
