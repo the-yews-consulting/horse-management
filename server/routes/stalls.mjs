@@ -86,7 +86,7 @@ router.post('/', authenticateToken, async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('stalls')
-      .insert([req.body])
+      .insert([{ ...req.body, user_id: req.user.id }])
       .select()
       .single();
 
