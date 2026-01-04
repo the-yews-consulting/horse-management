@@ -1,4 +1,4 @@
 import { createLucideIcon } from 'lucide-react';
-import { Warehouse  } from '@lucide/lab';
+import { Warehouse } from '@lucide/lab';
 
-export const House = createLucideIcon('Warehouse ', Warehouse);
+export const Warehouse = createLucideIcon('Warehouse ', Warehouse);
