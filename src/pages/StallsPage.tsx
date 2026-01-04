@@ -56,7 +56,7 @@ export function StallsPage() {
       loadStalls();
     } catch (error) {
       console.error('Failed to save stall:', error);
-      alert('Failed to save stall. Please try again.');
+      alert('Failed to save stable. Please try again.');
     }
   };
 
@@ -67,13 +67,13 @@ export function StallsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this stall?')) return;
+    if (!confirm('Are you sure you want to delete this stable?')) return;
     try {
       await deleteStall(id);
       loadStalls();
     } catch (error) {
       console.error('Failed to delete stall:', error);
-      alert('Failed to delete stall. Please try again.');
+      alert('Failed to delete stable. Please try again.');
     }
   };
 
@@ -113,21 +113,21 @@ export function StallsPage() {
       <QuickNav />
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Stalls</h1>
-          <p className="text-gray-600 mt-1">Manage your stalls and assignments</p>
+          <h1 className="text-3xl font-bold text-gray-900">Stables</h1>
+          <p className="text-gray-600 mt-1">Manage your stables and assignments</p>
         </div>
         <button
           onClick={handleAddNew}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
           <Plus size={20} />
-          Add Stall
+          Add Stable
         </button>
       </div>
 
       {stalls.length === 0 ? (
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 text-center">
-          <p className="text-gray-500">No stalls added yet. Add your first stall to get started.</p>
+          <p className="text-gray-500">No stables added yet. Add your first stable to get started.</p>
         </div>
       ) : (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
@@ -200,7 +200,7 @@ export function StallsPage() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingStall ? 'Edit Stall' : 'Add New Stall'}
+        title={editingStall ? 'Edit Stable' : 'Add New Stable'}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -309,7 +309,7 @@ export function StallsPage() {
               type="submit"
               className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
-              {editingStall ? 'Update' : 'Add'} Stall
+              {editingStall ? 'Update' : 'Add'} Stable
             </button>
           </div>
         </form>

@@ -275,7 +275,7 @@ export async function getStalls(): Promise<Stall[]> {
 export async function getStall(id: string): Promise<Stall> {
   const response = await fetch(`${API_BASE_URL}/stalls/${id}`);
   if (!response.ok) {
-    throw new Error('Failed to fetch stall');
+    throw new Error('Failed to fetch stable');
   }
   return await response.json();
 }
@@ -291,7 +291,7 @@ export async function createStall(stall: Stall): Promise<Stall> {
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.error || 'Failed to create stall');
+    throw new Error(error.error || 'Failed to create stable');
   }
 
   return await response.json();
@@ -308,7 +308,7 @@ export async function updateStall(id: string, stall: Stall): Promise<Stall> {
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.error || 'Failed to update stall');
+    throw new Error(error.error || 'Failed to update stable');
   }
 
   return await response.json();
@@ -320,7 +320,7 @@ export async function deleteStall(id: string): Promise<{ success: boolean }> {
   });
 
   if (!response.ok) {
-    throw new Error('Failed to delete stall');
+    throw new Error('Failed to delete stable');
   }
 
   return await response.json();
