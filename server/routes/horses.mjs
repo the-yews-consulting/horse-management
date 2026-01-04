@@ -36,7 +36,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.post('/', requireRole('admin', 'staff'), async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     console.log('Received horse creation request:', req.body);
     console.log('User:', req.user);
@@ -49,7 +49,7 @@ router.post('/', requireRole('admin', 'staff'), async (req, res) => {
   }
 });
 
-router.put('/:id', requireRole('admin', 'staff'), async (req, res) => {
+router.put('/:id', async (req, res) => {
   try {
     await updateHorse(req.params.id, req.body);
     const horse = await getHorseById(req.params.id);

@@ -317,7 +317,8 @@ export async function createHorse(horse) {
       competition_record: horse.competition_record,
       training_notes: horse.training_notes,
       video_urls: horse.video_urls,
-      related_links: horse.related_links
+      related_links: horse.related_links,
+      markings_image: horse.markings_image
     })
     .select()
     .single();
@@ -408,7 +409,8 @@ export async function updateHorse(id, horse) {
       competition_record: horse.competition_record,
       training_notes: horse.training_notes,
       video_urls: horse.video_urls,
-      related_links: horse.related_links
+      related_links: horse.related_links,
+      markings_image: horse.markings_image
     })
     .eq('id', id);
 
