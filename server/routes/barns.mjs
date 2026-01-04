@@ -40,9 +40,10 @@ router.get('/:id', authenticateToken, async (req, res) => {
 
 router.post('/', authenticateToken, async (req, res) => {
   try {
+    const { yards, ...barnData } = req.body;
     const { data, error } = await supabase
       .from('barns')
-      .insert([req.body])
+      .insert([barnData])
       .select()
       .single();
 
@@ -56,9 +57,10 @@ router.post('/', authenticateToken, async (req, res) => {
 
 router.put('/:id', authenticateToken, async (req, res) => {
   try {
+    const { yards, ...barnData } = req.body;
     const { data, error } = await supabase
       .from('barns')
-      .update({ ...req.body, updated_at: new Date().toISOString() })
+      .update({ ...barnData, updated_at: new Date().toISOString() })
       .eq('id', req.params.id)
       .select()
       .single();
