@@ -14,7 +14,7 @@ import {
   LogOut,
   User
 } from 'lucide-react';
-import { house as HousePlus } from '@lucide/lab';
+import { House as HousePlus } from '../HouseIcon';
 import { HorseHead } from '../HorseHeadIcon';
 
 export function MainLayout() {
