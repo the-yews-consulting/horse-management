@@ -45,3 +45,4 @@ npm run dev
 # node server.js
 # or whatever your start command is
 
+echo "=== Dev server is now running with fresh code! ==="
