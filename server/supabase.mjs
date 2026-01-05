@@ -7,8 +7,16 @@ const supabaseUrl = process.env.VITE_SUPABASE_URL;
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
 
+console.log('Supabase URL:', supabaseUrl);
+console.log('Service Role Key:', supabaseServiceRoleKey ? 'Set' : 'Not set');
+console.log('Anon Key:', supabaseAnonKey ? 'Set' : 'Not set');
+
 if (!supabaseUrl || !supabaseServiceRoleKey) {
   throw new Error('Missing Supabase environment variables');
+}
+
+if (!supabaseAnonKey) {
+  throw new Error('Missing VITE_SUPABASE_ANON_KEY environment variable');
 }
 
 if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {

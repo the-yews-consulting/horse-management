@@ -42,31 +42,46 @@ export async function register(email, password, fullName, role = 'user') {
 }
 
 export async function login(email, password) {
-  const { data, error } = await supabaseAuth.auth.signInWithPassword({
-    email,
-    password
-  });
+  console.log('Attempting login for:', email);
 
-  if (error) {
-    throw new Error('Invalid email or password');
+  try {
+    const { data, error } = await supabaseAuth.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    console.log('Supabase auth response:', {
+      hasData: !!data,
+      hasUser: !!data?.user,
+      hasSession: !!data?.session,
+      error: error ? error.message : null
+    });
+
+    if (error) {
+      console.error('Supabase auth error:', error);
+      throw new Error('Invalid email or password');
+    }
+
+    if (!data.user) {
+      throw new Error('Invalid email or password');
+    }
+
+    const profile = await getUserById(data.user.id);
+    if (!profile) {
+      throw new Error('User profile not found');
+    }
+
+    const token = jwt.sign(
+      { id: profile.id, email: profile.email, role: profile.role },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    return { token, user: profile };
+  } catch (error) {
+    console.error('Login error:', error);
+    throw error;
   }
-
-  if (!data.user) {
-    throw new Error('Invalid email or password');
-  }
-
-  const profile = await getUserById(data.user.id);
-  if (!profile) {
-    throw new Error('User profile not found');
-  }
-
-  const token = jwt.sign(
-    { id: profile.id, email: profile.email, role: profile.role },
-    JWT_SECRET,
-    { expiresIn: '7d' }
-  );
-
-  return { token, user: profile };
 }
 
 export async function verifyToken(token) {
