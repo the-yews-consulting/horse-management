@@ -355,7 +355,6 @@ export function HorsesPage() {
         title={viewMode ? 'View Horse' : (editingHorse ? 'Edit Horse' : 'Add New Horse')}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
-          <fieldset disabled={viewMode}>
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex space-x-4 overflow-x-auto">
               {[
@@ -387,6 +386,7 @@ export function HorsesPage() {
             </nav>
           </div>
 
+          <fieldset disabled={viewMode}>
           <div className="max-h-[60vh] overflow-y-auto pr-2 space-y-4">
             {activeTab === 'basic' && (
               <div className="space-y-4">
