@@ -1,10 +1,19 @@
 import express from 'express';
-import { createBoardingAssignment } from '../database.mjs';
+import { createBoardingAssignment, getAllActiveBoardingAssignments } from '../database.mjs';
 import { authenticateToken, requireRole } from '../middleware/auth.mjs';
 
 const router = express.Router();
 
 router.use(authenticateToken);
+
+router.get('/', async (req, res) => {
+  try {
+    const assignments = await getAllActiveBoardingAssignments();
+    res.json(assignments);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 router.post('/', requireRole('admin', 'staff'), async (req, res) => {
   try {

@@ -1,7 +1,7 @@
 import { Activity, Users, Warehouse } from 'lucide-react';
 import { HorseHead } from '../components/HorseHeadIcon';
 import { useState, useEffect } from 'react';
-import { getHorses, getStalls, getOwners } from '../services/api';
+import { getHorses, getStalls, getOwners, getBoardingAssignments } from '../services/api';
 
 export function StableDashboard() {
   const [stats, setStats] = useState({
@@ -15,15 +15,16 @@ export function StableDashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [horses, stalls, owners] = await Promise.all([
+        const [horses, stalls, owners, assignments] = await Promise.all([
           getHorses(),
           getStalls(),
-          getOwners()
+          getOwners(),
+          getBoardingAssignments()
         ]);
 
-        const occupiedStalls = stalls.filter(s => s.status === 'occupied').length;
+        const occupiedStallIds = new Set(assignments.map(a => a.stall_id));
         const occupancyRate = stalls.length > 0
-          ? Math.round((occupiedStalls / stalls.length) * 100)
+          ? Math.round((occupiedStallIds.size / stalls.length) * 100)
           : 0;
 
         setStats({

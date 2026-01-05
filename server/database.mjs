@@ -794,6 +794,26 @@ export async function getActiveAssignmentByHorseId(horseId) {
   return null;
 }
 
+export async function getAllActiveBoardingAssignments() {
+  const { data, error } = await supabase
+    .from('boarding_assignments')
+    .select(`
+      *,
+      horse:horses(name),
+      stall:stalls(name, building)
+    `)
+    .or(`end_date.is.null,end_date.gte.${new Date().toISOString().split('T')[0]}`)
+    .order('start_date', { ascending: false });
+
+  if (error) throw error;
+  return data.map(assignment => ({
+    ...assignment,
+    horse_name: assignment.horse?.name,
+    stall_name: assignment.stall?.name,
+    building: assignment.stall?.building
+  }));
+}
+
 export async function linkSensorToStall(sensor) {
   const { data, error } = await supabase
     .from('ha_sensors')

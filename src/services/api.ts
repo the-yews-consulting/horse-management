@@ -274,7 +274,11 @@ export async function deleteHorse(id: string): Promise<{ success: boolean }> {
 }
 
 export async function getStalls(): Promise<Stall[]> {
-  const response = await fetch(`${API_BASE_URL}/stalls`);
+  const response = await fetch(`${API_BASE_URL}/stalls`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+    }
+  });
   if (!response.ok) {
     throw new Error('Failed to fetch stalls');
   }
@@ -336,7 +340,11 @@ export async function deleteStall(id: string): Promise<{ success: boolean }> {
 }
 
 export async function getOwners(): Promise<Owner[]> {
-  const response = await fetch(`${API_BASE_URL}/owners`);
+  const response = await fetch(`${API_BASE_URL}/owners`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+    }
+  });
   if (!response.ok) {
     throw new Error('Failed to fetch owners');
   }
@@ -519,6 +527,34 @@ export async function deleteFarrier(id: string): Promise<{ success: boolean }> {
   }
 
   return await response.json();
+}
+
+export async function getBoardingAssignments(): Promise<BoardingAssignment[]> {
+  const response = await fetch(`${API_BASE_URL}/boarding`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+    }
+  });
+  if (!response.ok) {
+    throw new Error('Failed to fetch boarding assignments');
+  }
+  return await response.json();
+}
+
+export interface BoardingAssignment {
+  id?: string;
+  horse_id: string;
+  stall_id: string;
+  boarding_type: 'full' | 'partial' | 'training';
+  monthly_rate?: number;
+  start_date: string;
+  end_date?: string;
+  notes?: string;
+  horse_name?: string;
+  stall_name?: string;
+  building?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Activity {
