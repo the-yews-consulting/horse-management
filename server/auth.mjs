@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { getUserByEmail, getUserById } from './database.mjs';
-import { supabase } from './supabase.mjs';
+import { supabase, supabaseAuth } from './supabase.mjs';
 import { JWT_SECRET } from './middleware/auth.mjs';
 
 export async function register(email, password, fullName, role = 'user') {
@@ -42,7 +42,7 @@ export async function register(email, password, fullName, role = 'user') {
 }
 
 export async function login(email, password) {
-  const { data, error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabaseAuth.auth.signInWithPassword({
     email,
     password
   });

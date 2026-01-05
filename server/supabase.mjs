@@ -25,6 +25,13 @@ export const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
   }
 });
 
+export const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
+  }
+});
+
 export function getSupabaseClient(accessToken) {
   if (!accessToken) {
     return supabase;
