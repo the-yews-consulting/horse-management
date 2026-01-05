@@ -374,7 +374,8 @@ export async function getHorseById(id) {
 }
 
 export async function updateHorse(id, horse) {
-  const { error } = await supabase
+  console.log('updateHorse called with id:', id, 'data:', horse);
+  const { data, error } = await supabase
     .from('horses')
     .update({
       name: horse.name,
@@ -412,8 +413,10 @@ export async function updateHorse(id, horse) {
       related_links: horse.related_links,
       markings_image: horse.markings_image
     })
-    .eq('id', id);
+    .eq('id', id)
+    .select();
 
+  console.log('Supabase update result - data:', data, 'error:', error);
   if (error) throw error;
   return true;
 }

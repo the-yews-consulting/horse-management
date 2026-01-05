@@ -188,10 +188,13 @@ router.post('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
   try {
+    console.log('Updating horse:', req.params.id, req.body);
     await updateHorse(req.params.id, req.body);
     const horse = await getHorseById(req.params.id);
+    console.log('Horse updated successfully:', horse);
     res.json(horse);
   } catch (error) {
+    console.error('Error updating horse:', error);
     res.status(400).json({ error: error.message });
   }
 });
