@@ -22,6 +22,8 @@ export function VetsFarriersPage() {
   const [isFarrierModalOpen, setIsFarrierModalOpen] = useState(false);
   const [editingVet, setEditingVet] = useState<Vet | null>(null);
   const [editingFarrier, setEditingFarrier] = useState<Farrier | null>(null);
+  const [isVetViewMode, setIsVetViewMode] = useState(false);
+  const [isFarrierViewMode, setIsFarrierViewMode] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -41,15 +43,25 @@ export function VetsFarriersPage() {
 
   const handleAddVet = () => {
     setEditingVet(null);
+    setIsVetViewMode(false);
     setIsVetModalOpen(true);
   };
 
-  const handleEditVet = (vet: Vet) => {
+  const handleViewVet = (vet: Vet) => {
     setEditingVet(vet);
+    setIsVetViewMode(true);
     setIsVetModalOpen(true);
   };
 
-  const handleDeleteVet = async (id: string) => {
+  const handleEditVet = (vet: Vet, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingVet(vet);
+    setIsVetViewMode(false);
+    setIsVetModalOpen(true);
+  };
+
+  const handleDeleteVet = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     if (!confirm('Are you sure you want to delete this vet?')) return;
     try {
       await deleteVet(id);
@@ -88,15 +100,25 @@ export function VetsFarriersPage() {
 
   const handleAddFarrier = () => {
     setEditingFarrier(null);
+    setIsFarrierViewMode(false);
     setIsFarrierModalOpen(true);
   };
 
-  const handleEditFarrier = (farrier: Farrier) => {
+  const handleViewFarrier = (farrier: Farrier) => {
     setEditingFarrier(farrier);
+    setIsFarrierViewMode(true);
     setIsFarrierModalOpen(true);
   };
 
-  const handleDeleteFarrier = async (id: string) => {
+  const handleEditFarrier = (farrier: Farrier, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingFarrier(farrier);
+    setIsFarrierViewMode(false);
+    setIsFarrierModalOpen(true);
+  };
+
+  const handleDeleteFarrier = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     if (!confirm('Are you sure you want to delete this farrier?')) return;
     try {
       await deleteFarrier(id);
@@ -166,7 +188,8 @@ export function VetsFarriersPage() {
                 {vets.map((vet) => (
                   <div
                     key={vet.id}
-                    className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition"
+                    className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition cursor-pointer"
+                    onClick={() => handleViewVet(vet)}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -200,13 +223,13 @@ export function VetsFarriersPage() {
                       </div>
                       <div className="flex space-x-2 ml-4">
                         <button
-                          onClick={() => handleEditVet(vet)}
+                          onClick={(e) => handleEditVet(vet, e)}
                           className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
                         >
                           <Edit className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => handleDeleteVet(vet.id!)}
+                          onClick={(e) => handleDeleteVet(vet.id!, e)}
                           className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -243,7 +266,8 @@ export function VetsFarriersPage() {
                 {farriers.map((farrier) => (
                   <div
                     key={farrier.id}
-                    className="p-4 border border-gray-200 rounded-lg hover:border-amber-300 transition"
+                    className="p-4 border border-gray-200 rounded-lg hover:border-amber-300 transition cursor-pointer"
+                    onClick={() => handleViewFarrier(farrier)}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -274,13 +298,13 @@ export function VetsFarriersPage() {
                       </div>
                       <div className="flex space-x-2 ml-4">
                         <button
-                          onClick={() => handleEditFarrier(farrier)}
+                          onClick={(e) => handleEditFarrier(farrier, e)}
                           className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition"
                         >
                           <Edit className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => handleDeleteFarrier(farrier.id!)}
+                          onClick={(e) => handleDeleteFarrier(farrier.id!, e)}
                           className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -298,9 +322,10 @@ export function VetsFarriersPage() {
       <Modal
         isOpen={isVetModalOpen}
         onClose={() => setIsVetModalOpen(false)}
-        title={editingVet ? 'Edit Vet' : 'Add Vet'}
+        title={isVetViewMode ? 'View Vet' : (editingVet ? 'Edit Vet' : 'Add Vet')}
       >
         <form onSubmit={handleVetSubmit} className="space-y-4">
+          <fieldset disabled={isVetViewMode}>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Name *
@@ -401,21 +426,34 @@ export function VetsFarriersPage() {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
+          </fieldset>
 
           <div className="flex justify-end space-x-3 pt-4">
-            <button
-              type="button"
-              onClick={() => setIsVetModalOpen(false)}
-              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-            >
-              {editingVet ? 'Update' : 'Create'}
-            </button>
+            {isVetViewMode ? (
+              <button
+                type="button"
+                onClick={() => setIsVetModalOpen(false)}
+                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
+              >
+                Close
+              </button>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setIsVetModalOpen(false)}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                >
+                  {editingVet ? 'Update' : 'Create'}
+                </button>
+              </>
+            )}
           </div>
         </form>
       </Modal>
@@ -423,9 +461,10 @@ export function VetsFarriersPage() {
       <Modal
         isOpen={isFarrierModalOpen}
         onClose={() => setIsFarrierModalOpen(false)}
-        title={editingFarrier ? 'Edit Farrier' : 'Add Farrier'}
+        title={isFarrierViewMode ? 'View Farrier' : (editingFarrier ? 'Edit Farrier' : 'Add Farrier')}
       >
         <form onSubmit={handleFarrierSubmit} className="space-y-4">
+          <fieldset disabled={isFarrierViewMode}>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Name *
@@ -500,21 +539,34 @@ export function VetsFarriersPage() {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
             />
           </div>
+          </fieldset>
 
           <div className="flex justify-end space-x-3 pt-4">
-            <button
-              type="button"
-              onClick={() => setIsFarrierModalOpen(false)}
-              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition"
-            >
-              {editingFarrier ? 'Update' : 'Create'}
-            </button>
+            {isFarrierViewMode ? (
+              <button
+                type="button"
+                onClick={() => setIsFarrierModalOpen(false)}
+                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
+              >
+                Close
+              </button>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setIsFarrierModalOpen(false)}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition"
+                >
+                  {editingFarrier ? 'Update' : 'Create'}
+                </button>
+              </>
+            )}
           </div>
         </form>
       </Modal>

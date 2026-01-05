@@ -22,6 +22,7 @@ export function HorsesPage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingHorse, setEditingHorse] = useState<Horse | null>(null);
+  const [viewMode, setViewMode] = useState(false);
   const [activeTab, setActiveTab] = useState('basic');
   const [formData, setFormData] = useState<Partial<Horse>>({
     name: '',
@@ -180,14 +181,25 @@ export function HorsesPage() {
     }
   };
 
-  const handleEdit = (horse: Horse) => {
+  const handleView = (horse: Horse) => {
     setEditingHorse(horse);
     setActiveTab('basic');
     setFormData(horse);
+    setViewMode(true);
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleEdit = (horse: Horse, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingHorse(horse);
+    setActiveTab('basic');
+    setFormData(horse);
+    setViewMode(false);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     if (!confirm('Are you sure you want to delete this horse?')) return;
     try {
       await deleteHorse(id);
@@ -200,6 +212,7 @@ export function HorsesPage() {
 
   const handleAddNew = () => {
     setEditingHorse(null);
+    setViewMode(false);
     setActiveTab('basic');
     setFormData({
       name: '',
@@ -285,7 +298,11 @@ export function HorsesPage() {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {horses.map((horse) => (
-                <tr key={horse.id} className="hover:bg-gray-50">
+                <tr
+                  key={horse.id}
+                  className="hover:bg-gray-50 cursor-pointer"
+                  onClick={() => handleView(horse)}
+                >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">{horse.name}</div>
                     {horse.pet_name && (
@@ -312,13 +329,13 @@ export function HorsesPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end gap-2">
                       <button
-                        onClick={() => handleEdit(horse)}
+                        onClick={(e) => handleEdit(horse, e)}
                         className="text-blue-600 hover:text-blue-800 transition-colors"
                       >
                         <Edit size={18} />
                       </button>
                       <button
-                        onClick={() => handleDelete(horse.id!)}
+                        onClick={(e) => handleDelete(horse.id!, e)}
                         className="text-red-600 hover:text-red-800 transition-colors"
                       >
                         <Trash2 size={18} />
@@ -335,9 +352,10 @@ export function HorsesPage() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingHorse ? 'Edit Horse' : 'Add New Horse'}
+        title={viewMode ? 'View Horse' : (editingHorse ? 'Edit Horse' : 'Add New Horse')}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
+          <fieldset disabled={viewMode}>
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex space-x-4 overflow-x-auto">
               {[
@@ -779,21 +797,34 @@ export function HorsesPage() {
               </div>
             )}
           </div>
+          </fieldset>
 
           <div className="flex gap-3 pt-4 border-t bg-white">
-            <button
-              type="button"
-              onClick={() => setIsModalOpen(false)}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              {editingHorse ? 'Update' : 'Add'} Horse
-            </button>
+            {viewMode ? (
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                Close
+              </button>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  {editingHorse ? 'Update' : 'Add'} Horse
+                </button>
+              </>
+            )}
           </div>
         </form>
       </Modal>

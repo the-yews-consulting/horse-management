@@ -22,6 +22,7 @@ export function StallsPage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStall, setEditingStall] = useState<Stall | null>(null);
+  const [isViewOnly, setIsViewOnly] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'floorplan'>('list');
   const [floorplans, setFloorplans] = useState<Floorplan[]>([]);
   const [currentFloorplan, setCurrentFloorplan] = useState<Floorplan | null>(null);
@@ -151,13 +152,23 @@ export function StallsPage() {
     }
   };
 
-  const handleEdit = (stall: Stall) => {
+  const handleView = (stall: Stall) => {
     setEditingStall(stall);
     setFormData(stall);
+    setIsViewOnly(true);
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleEdit = (stall: Stall, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingStall(stall);
+    setFormData(stall);
+    setIsViewOnly(false);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     if (!confirm('Are you sure you want to delete this stable?')) return;
     try {
       await deleteStall(id);
@@ -170,6 +181,7 @@ export function StallsPage() {
 
   const handleAddNew = () => {
     setEditingStall(null);
+    setIsViewOnly(false);
     setFormData({
       name: '',
       barn_id: '',
@@ -281,7 +293,11 @@ export function StallsPage() {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {stalls.map((stall) => (
-                <tr key={stall.id} className="hover:bg-gray-50">
+                <tr
+                  key={stall.id}
+                  className="hover:bg-gray-50 cursor-pointer"
+                  onClick={() => handleView(stall)}
+                >
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {stall.name}
                   </td>
@@ -302,13 +318,13 @@ export function StallsPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end gap-2">
                       <button
-                        onClick={() => handleEdit(stall)}
+                        onClick={(e) => handleEdit(stall, e)}
                         className="text-blue-600 hover:text-blue-800 transition-colors"
                       >
                         <Edit size={18} />
                       </button>
                       <button
-                        onClick={() => handleDelete(stall.id!)}
+                        onClick={(e) => handleDelete(stall.id!, e)}
                         className="text-red-600 hover:text-red-800 transition-colors"
                       >
                         <Trash2 size={18} />
@@ -325,9 +341,10 @@ export function StallsPage() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingStall ? 'Edit Stable' : 'Add New Stable'}
+        title={isViewOnly ? 'View Stable' : (editingStall ? 'Edit Stable' : 'Add New Stable')}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
+          <fieldset disabled={isViewOnly}>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Name *
@@ -443,21 +460,34 @@ export function StallsPage() {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
+          </fieldset>
 
           <div className="flex gap-3 pt-4">
-            <button
-              type="button"
-              onClick={() => setIsModalOpen(false)}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              {editingStall ? 'Update' : 'Add'} Stable
-            </button>
+            {isViewOnly ? (
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                Close
+              </button>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  {editingStall ? 'Update' : 'Add'} Stable
+                </button>
+              </>
+            )}
           </div>
         </form>
       </Modal>

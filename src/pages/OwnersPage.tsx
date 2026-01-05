@@ -9,6 +9,7 @@ export function OwnersPage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingOwner, setEditingOwner] = useState<Owner | null>(null);
+  const [viewMode, setViewMode] = useState(false);
   const [formData, setFormData] = useState<Partial<Owner>>({
     first_name: '',
     last_name: '',
@@ -62,13 +63,23 @@ export function OwnersPage() {
     }
   };
 
-  const handleEdit = (owner: Owner) => {
+  const handleView = (owner: Owner) => {
     setEditingOwner(owner);
     setFormData(owner);
+    setViewMode(true);
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleEdit = (owner: Owner, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingOwner(owner);
+    setFormData(owner);
+    setViewMode(false);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     if (!confirm('Are you sure you want to delete this owner?')) return;
     try {
       await deleteOwner(id);
@@ -81,6 +92,7 @@ export function OwnersPage() {
 
   const handleAddNew = () => {
     setEditingOwner(null);
+    setViewMode(false);
     setFormData({
       first_name: '',
       last_name: '',
@@ -122,7 +134,11 @@ export function OwnersPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {owners.map((owner) => (
-            <div key={owner.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+            <div
+              key={owner.id}
+              className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer"
+              onClick={() => handleView(owner)}
+            >
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">
@@ -131,13 +147,13 @@ export function OwnersPage() {
                 </div>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => handleEdit(owner)}
+                    onClick={(e) => handleEdit(owner, e)}
                     className="text-blue-600 hover:text-blue-800 transition-colors"
                   >
                     <Edit size={18} />
                   </button>
                   <button
-                    onClick={() => handleDelete(owner.id!)}
+                    onClick={(e) => handleDelete(owner.id!, e)}
                     className="text-red-600 hover:text-red-800 transition-colors"
                   >
                     <Trash2 size={18} />
@@ -183,9 +199,10 @@ export function OwnersPage() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingOwner ? 'Edit Owner' : 'Add New Owner'}
+        title={viewMode ? 'View Owner' : (editingOwner ? 'Edit Owner' : 'Add New Owner')}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
+          <fieldset disabled={viewMode}>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -292,21 +309,34 @@ export function OwnersPage() {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
+          </fieldset>
 
           <div className="flex gap-3 pt-4">
-            <button
-              type="button"
-              onClick={() => setIsModalOpen(false)}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              {editingOwner ? 'Update' : 'Add'} Owner
-            </button>
+            {viewMode ? (
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                Close
+              </button>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  {editingOwner ? 'Update' : 'Add'} Owner
+                </button>
+              </>
+            )}
           </div>
         </form>
       </Modal>
