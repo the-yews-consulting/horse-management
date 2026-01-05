@@ -406,7 +406,11 @@ export async function deleteOwner(id: string): Promise<{ success: boolean }> {
 }
 
 export async function getVets(): Promise<Vet[]> {
-  const response = await fetch(`${API_BASE_URL}/vets`);
+  const response = await fetch(`${API_BASE_URL}/vets`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+    }
+  });
   if (!response.ok) {
     throw new Error('Failed to fetch vets');
   }
@@ -468,7 +472,11 @@ export async function deleteVet(id: string): Promise<{ success: boolean }> {
 }
 
 export async function getFarriers(): Promise<Farrier[]> {
-  const response = await fetch(`${API_BASE_URL}/farriers`);
+  const response = await fetch(`${API_BASE_URL}/farriers`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+    }
+  });
   if (!response.ok) {
     throw new Error('Failed to fetch farriers');
   }
