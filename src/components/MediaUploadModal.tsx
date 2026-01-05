@@ -132,7 +132,10 @@ export default function MediaUploadModal({ horseId, onClose, onComplete }: Media
 
         const response = await fetch(`/api/horses/${horseId}/media`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+          },
           body: JSON.stringify(mediaData)
         });
 

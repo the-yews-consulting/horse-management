@@ -42,7 +42,11 @@ export default function MediaManager({ horseId }: MediaManagerProps) {
   const loadMedia = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/horses/${horseId}/media`);
+      const response = await fetch(`/api/horses/${horseId}/media`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         setMedia(data);
@@ -63,7 +67,10 @@ export default function MediaManager({ horseId }: MediaManagerProps) {
     try {
       const response = await fetch(`/api/horses/${horseId}/media/${item.id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        },
         body: JSON.stringify({ ...item, is_private: !item.is_private })
       });
 
@@ -80,7 +87,10 @@ export default function MediaManager({ horseId }: MediaManagerProps) {
 
     try {
       const response = await fetch(`/api/horses/${horseId}/media/${item.id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+        }
       });
 
       if (response.ok) {
