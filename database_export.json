@@ -1,0 +1,397 @@
+{
+  "export_date": "2026-01-06",
+  "export_notes": "Complete database export from Supabase. Import after applying all migrations.",
+  "statistics": {
+    "total_tables": 23,
+    "total_rows": 73,
+    "empty_tables": ["horse_media", "floorplans", "alerts", "alert_history"]
+  },
+  "data": {
+    "profiles": [
+      {
+        "id": "c1aa5f68-b087-47de-a388-2ef8f597f2a5",
+        "email": "guido666@gmail.com",
+        "full_name": null,
+        "role": "super_admin",
+        "is_active": true,
+        "account_status": "enabled"
+      },
+      {
+        "id": "8051d92e-c555-4df2-a42e-00e811fb482d",
+        "email": "sharonball58@gmail.com",
+        "full_name": "",
+        "role": "admin",
+        "is_active": true,
+        "account_status": "pending"
+      },
+      {
+        "id": "4dbb089d-3b1c-4ab9-ae79-609c2e846055",
+        "email": "guido666+test@gmail.com",
+        "full_name": "",
+        "role": "user",
+        "is_active": true,
+        "account_status": "pending"
+      }
+    ],
+    "team_members": [
+      {
+        "id": "24e23894-9bfe-4558-83f2-e0ee2faee338",
+        "first_name": "sharon",
+        "last_name": "Ball",
+        "email": "sharonball58@gmail.com",
+        "phone": "01327342460",
+        "role": "manager",
+        "is_active": true,
+        "hire_date": "2010-01-24",
+        "created_by": "c1aa5f68-b087-47de-a388-2ef8f597f2a5"
+      }
+    ],
+    "horse_breeds": [
+      {"id": "2da154b0-5922-45a7-81e0-04beaee5ec1b", "name": "Pony", "abbreviation": "PNY", "is_default": false},
+      {"id": "82dd0dc7-6b46-4840-9257-0e2b52a6829a", "name": "Standardbred", "abbreviation": "STD", "is_default": false},
+      {"id": "e663ff73-1bc3-4ca4-b5ca-8c91263b9397", "name": "Thoroughbred", "abbreviation": "TB", "is_default": true},
+      {"id": "7d97711b-5d26-4d95-8baa-6ed032cdba5c", "name": "Purebred Arabian", "abbreviation": "PA", "is_default": false},
+      {"id": "68554b35-bbd8-406f-a87d-39b0c6968609", "name": "Quarter Horse", "abbreviation": "QTR1", "is_default": false}
+    ],
+    "horse_colours": [
+      {"id": "1a9c5bad-6317-42db-a649-6ef4f4116fc7", "name": "Brown", "abbreviation": "BR", "is_default": false},
+      {"id": "1445a3ff-bd16-4170-9aca-f48453fd3b67", "name": "Bay", "abbreviation": "BAY", "is_default": true},
+      {"id": "5be59339-4eb6-4a72-8d2e-ad3216699ca7", "name": "Chesnut", "abbreviation": "CH", "is_default": false},
+      {"id": "3fe51740-a18f-4652-b18f-315bd85a7c54", "name": "Grey", "abbreviation": "GR", "is_default": false},
+      {"id": "6ad51140-bc84-4669-83ea-66ab4cd59435", "name": "Black", "abbreviation": "BL", "is_default": false}
+    ],
+    "horse_genders": [
+      {"id": "ee3f494e-3ce7-4073-a580-e67d95d4cb88", "name": "Colt", "abbreviation": "C", "is_default": false},
+      {"id": "db3a095f-9b9e-4941-931e-4b3793e16d21", "name": "Gelding", "abbreviation": "G", "is_default": true},
+      {"id": "16e12b0d-9bcf-44d6-846a-908a4580294e", "name": "Stallion", "abbreviation": "S", "is_default": false},
+      {"id": "864fc559-7b79-41ef-a2d5-8086ccce8da6", "name": "Filly", "abbreviation": "F", "is_default": false},
+      {"id": "c8e4d5d7-e477-4d38-bded-687b6a97364e", "name": "Mare", "abbreviation": "M", "is_default": false}
+    ],
+    "horse_statuses": [
+      {"id": "d6605b7d-0ccb-49a6-947f-a96bbb03bb81", "description": "Active", "is_default": true, "is_dead": false},
+      {"id": "21f03514-5e5f-484e-a0b6-c08fc763ce34", "description": "Retired", "is_default": false, "is_dead": false},
+      {"id": "2443ae53-60e3-467a-b192-764032c31a4a", "description": "Injured", "is_default": false, "is_dead": false},
+      {"id": "d80ba707-1d88-498d-9d7f-290a0281bea4", "description": "Deceased", "is_default": false, "is_dead": true}
+    ],
+    "farms": [
+      {
+        "id": "5db4ae52-7fe6-4ea8-bc17-17bdd6c59c9b",
+        "name": "My Farm",
+        "type": "General",
+        "address": "12 Church Street",
+        "country": "England",
+        "email": "guido666+obsbot@gmail.com",
+        "registration_number": "1234567890",
+        "active": true
+      },
+      {
+        "id": "f26916fa-e746-4669-8f21-429a8797969f",
+        "name": "Another Farm",
+        "type": "Training",
+        "country": "England",
+        "active": true
+      }
+    ],
+    "yards": [
+      {
+        "id": "b928ed15-57ed-4ebc-b0dc-35711db3e258",
+        "name": "Yard1",
+        "farm_id": "5db4ae52-7fe6-4ea8-bc17-17bdd6c59c9b",
+        "active": true
+      },
+      {
+        "id": "f1cd5783-bf7d-4354-8468-e9759d356654",
+        "name": "yard 2",
+        "farm_id": "5db4ae52-7fe6-4ea8-bc17-17bdd6c59c9b",
+        "active": true
+      }
+    ],
+    "barns": [
+      {
+        "id": "b4867e8c-5e66-4b12-bac0-b36f48fa0f84",
+        "name": "Main Barn",
+        "yard_id": "b928ed15-57ed-4ebc-b0dc-35711db3e258",
+        "active": true
+      },
+      {
+        "id": "5061f36a-b4aa-4297-a329-56ddae53438f",
+        "name": "barn 2",
+        "yard_id": "b928ed15-57ed-4ebc-b0dc-35711db3e258",
+        "active": true
+      }
+    ],
+    "owners": [
+      {
+        "id": "e103c60e-d3b1-462f-854c-b03666c7b8e9",
+        "name": "Sharon Ball",
+        "email": "russell@theyewsconsulting.com",
+        "phone": "07527006240",
+        "address": "12 CHURCH ST, Weedon Bec, Weedon Bec\\nWeedon Bec"
+      },
+      {
+        "id": "a7958db4-0340-41ae-88a7-165f63d298b2",
+        "name": "John Smith",
+        "email": "john.smith@email.com",
+        "phone": "555-0101",
+        "first_name": "John",
+        "last_name": "Smith",
+        "emergency_contact_name": "Jane Smith",
+        "emergency_contact_phone": "555-0102"
+      },
+      {
+        "id": "53dcb3da-3d48-486e-b558-d102546be75b",
+        "name": "Emma Thompson",
+        "email": "emma.t@email.com",
+        "phone": "555-0201",
+        "first_name": "Emma",
+        "last_name": "Thompson"
+      },
+      {
+        "id": "e3c8082c-0c38-4e13-af28-df94540dd572",
+        "name": "Michael Brown",
+        "email": "mbrown@email.com",
+        "phone": "555-0301",
+        "notes": "Has two horses"
+      },
+      {
+        "id": "5b7ebb1b-2d4e-4683-b45c-d4091b6ceb31",
+        "name": "Sarah Williams",
+        "email": "sarah.w@email.com",
+        "phone": "555-0401",
+        "notes": "Experienced rider"
+      },
+      {
+        "id": "8185e9ad-b4c3-441c-8264-8e80ce3d0add",
+        "name": "David Johnson",
+        "email": "djohnson@email.com",
+        "phone": "555-0501",
+        "notes": "Competitive showjumper"
+      }
+    ],
+    "vets": [
+      {
+        "id": "ffdbc331-eaca-41e8-9ed9-edb24d94be3c",
+        "name": "Made up Vet",
+        "mobile_phone": "07527006240"
+      },
+      {
+        "id": "d857bad1-fd5c-4d4b-9447-90f0ea690d7d",
+        "name": "Dr. Sarah Mitchell",
+        "clinic_name": "Equine Care Veterinary Hospital",
+        "email": "sarah.mitchell@equinecare.com",
+        "phone": "555-1001",
+        "emergency_phone": "555-1002",
+        "specialties": "Lameness, Internal Medicine"
+      },
+      {
+        "id": "8ace627f-a480-4331-9abc-ceba6bd2d5d6",
+        "name": "Dr. James Peterson",
+        "clinic_name": "Valley View Equine Clinic",
+        "specialties": "Surgery, Reproduction"
+      },
+      {
+        "id": "38df8bf7-c906-4a55-a2af-d62b339bc0f4",
+        "name": "Dr. Emily Rodriguez",
+        "clinic_name": "Countryside Animal Hospital",
+        "specialties": "General Practice, Dentistry"
+      },
+      {
+        "id": "bdd35ba7-5bee-4ef6-b686-24a0af87cfe8",
+        "name": "Dr. Michael Chen",
+        "clinic_name": "Premier Equine Veterinary Services",
+        "specialties": "Sports Medicine, Rehabilitation"
+      },
+      {
+        "id": "db90df14-4b77-4e83-be46-f145031fb0dc",
+        "name": "Dr. Amanda Brooks",
+        "clinic_name": "Holistic Horse Health Center",
+        "specialties": "Alternative Medicine, Nutrition"
+      }
+    ],
+    "farriers": [
+      {
+        "id": "29e9e377-ea16-4728-8c20-031013db5c47",
+        "name": "Farrier mad up",
+        "mobile_phone": "07527006240"
+      },
+      {
+        "id": "f919c0e1-057a-499b-921f-1bbf1199c4e0",
+        "name": "Tom Harrison",
+        "email": "tom.harrison@email.com",
+        "phone": "555-2001",
+        "service_areas": "Hillside, Meadowville, Countryside"
+      },
+      {
+        "id": "7cf2b360-21ca-48da-8f1b-036ebe3f92cd",
+        "name": "Rebecca Stone",
+        "email": "rebecca.stone@email.com",
+        "phone": "555-2101",
+        "notes": "Specializes in corrective shoeing"
+      },
+      {
+        "id": "0d3d44ef-c36d-4cd8-84e2-13df034adcc2",
+        "name": "Marcus Williams",
+        "email": "marcus.w@email.com",
+        "phone": "555-2201",
+        "notes": "Performance horse specialist"
+      },
+      {
+        "id": "6d0b616d-fbc1-45d1-879e-37dee18a4938",
+        "name": "Jennifer Martinez",
+        "email": "jennifer.martinez@email.com",
+        "phone": "555-2301"
+      },
+      {
+        "id": "6fd7d857-4c38-4681-a505-b8328f9bc860",
+        "name": "Robert Taylor",
+        "email": "robert.taylor@email.com",
+        "phone": "555-2401",
+        "notes": "Mobile forge service available, competition shoeing"
+      }
+    ],
+    "stalls": [
+      {"id": "f5e9dc8e-6d14-4a15-89d0-5ece77215f6e", "name": "Stable 1", "building": "Main Barn", "size": "14", "status": "available"},
+      {"id": "a79ca109-d685-4c1a-9cd0-84bc8cb5a918", "name": "Stable 2", "building": "Main Barn", "size": "12x12", "status": "available"},
+      {"id": "e2ab0182-507c-4c23-bc16-f99a34204418", "name": "Stable 3", "building": "Main Barn", "size": "14x14", "status": "available"},
+      {"id": "e456e474-edb2-44d5-ae8c-7e85fd7c32ce", "name": "Stable 4", "building": "Main Barn", "size": "12x12", "status": "available"},
+      {"id": "2b2dc7e5-b385-4dff-97e8-82ad88bfd35d", "name": "Stable 5", "building": "South Barn", "size": "14x14", "status": "available"},
+      {"id": "e228b0bb-c944-4156-b16c-420b87ff69c7", "name": "Stable 6", "building": "South Barn", "size": "12x14", "status": "available"},
+      {"id": "fbeeb33f-d601-4bf3-a26c-1222d128099a", "name": "Stable 7", "building": "South Barn", "size": "12x12", "status": "available"},
+      {"id": "4f4fe4ab-dd7c-4b87-89a8-7722b964b45e", "name": "Stable 8", "building": "North Barn", "size": "14x14", "status": "available"},
+      {"id": "130833a6-133a-4631-82f1-7acec1be2b5d", "name": "Stable 9", "building": "North Barn", "size": "12x12", "status": "available"},
+      {"id": "695d0a15-3034-45e1-9bfe-b8ab2d437856", "name": "Stable 10", "building": "North Barn", "size": "12x12", "status": "maintenance"}
+    ],
+    "horses": [
+      {
+        "id": "e5ff0683-1f0f-45ba-94cf-5872e6bb36bd",
+        "name": "Tango",
+        "breed": "Thorughbreed",
+        "color": "Chestnut",
+        "date_of_birth": "2000-01-01",
+        "microchip_id": "1234512345",
+        "owner_id": "e103c60e-d3b1-462f-854c-b03666c7b8e9",
+        "vet_id": "ffdbc331-eaca-41e8-9ed9-edb24d94be3c",
+        "farrier_id": "29e9e377-ea16-4728-8c20-031013db5c47",
+        "status": "active"
+      },
+      {
+        "id": "56ba5443-021b-45a6-b571-c257dc0a305c",
+        "name": "ssss",
+        "breed": "Purebred Arabian",
+        "color": "Bay",
+        "gender": "gelding",
+        "status": "active"
+      },
+      {
+        "id": "361291fd-ed04-40b3-9d03-ed8e118bb979",
+        "name": "Starlight",
+        "breed": "Hanoverian",
+        "color": "Dapple Gray",
+        "age": 9,
+        "gender": "mare",
+        "owner_id": "8185e9ad-b4c3-441c-8264-8e80ce3d0add",
+        "status": "active"
+      },
+      {
+        "id": "f9254ea6-3842-439d-a97a-6f6303189b1e",
+        "name": "Luna",
+        "breed": "Warmblood",
+        "color": "Gray",
+        "age": 6,
+        "gender": "mare",
+        "owner_id": "53dcb3da-3d48-486e-b558-d102546be75b",
+        "vet_id": "8ace627f-a480-4331-9abc-ceba6bd2d5d6",
+        "farrier_id": "7cf2b360-21ca-48da-8f1b-036ebe3f92cd",
+        "status": "active"
+      },
+      {
+        "id": "91cdd095-33e7-4d77-ac0c-cbc130be76a7",
+        "name": "Thunder",
+        "breed": "Quarter Horse",
+        "color": "Chestnut",
+        "age": 10,
+        "gender": "stallion",
+        "owner_id": "e3c8082c-0c38-4e13-af28-df94540dd572",
+        "status": "active"
+      },
+      {
+        "id": "a323c4e6-4d44-4b98-ba5f-8a21e468ac5a",
+        "name": "Shadow",
+        "breed": "Thoroughbred",
+        "color": "Black",
+        "age": 7,
+        "gender": "gelding",
+        "owner_id": "5b7ebb1b-2d4e-4683-b45c-d4091b6ceb31",
+        "status": "active"
+      },
+      {
+        "id": "ba5fd677-0546-4962-8c31-b5871430496c",
+        "name": "Apollo",
+        "breed": "Thoroughbred",
+        "color": "Bay",
+        "age": 8,
+        "gender": "gelding",
+        "pet_name": "lolly",
+        "owner_id": "a7958db4-0340-41ae-88a7-165f63d298b2",
+        "vet_id": "d857bad1-fd5c-4d4b-9447-90f0ea690d7d",
+        "farrier_id": "f919c0e1-057a-499b-921f-1bbf1199c4e0",
+        "status": "active"
+      },
+      {
+        "id": "d14f64d0-5d20-436a-8740-cca2b1442b9d",
+        "name": "Misty",
+        "breed": "Arabian",
+        "color": "White",
+        "age": 5,
+        "gender": "mare",
+        "owner_id": "e3c8082c-0c38-4e13-af28-df94540dd572",
+        "status": "active"
+      },
+      {
+        "id": "f0299903-49ec-47b2-8544-363e0a8448e7",
+        "name": "test1",
+        "breed": "Purebred Arabian",
+        "color": "Black",
+        "gender": "gelding",
+        "pet_name": "test",
+        "status": "active"
+      }
+    ],
+    "boarding_assignments": [
+      {"id": "a153824a-b7c9-4e37-854b-6581cba8cdff", "horse_id": "e5ff0683-1f0f-45ba-94cf-5872e6bb36bd", "stall_id": "f5e9dc8e-6d14-4a15-89d0-5ece77215f6e", "boarding_type": "full", "monthly_rate": "250.00", "start_date": "2025-12-23"},
+      {"id": "0240ea9c-8042-46da-b8ea-524531542c48", "horse_id": "ba5fd677-0546-4962-8c31-b5871430496c", "stall_id": "a79ca109-d685-4c1a-9cd0-84bc8cb5a918", "boarding_type": "full", "monthly_rate": "300.00", "start_date": "2026-01-01"},
+      {"id": "4a57998d-1a7f-42e6-99fe-1044c35ca380", "horse_id": "f9254ea6-3842-439d-a97a-6f6303189b1e", "stall_id": "e2ab0182-507c-4c23-bc16-f99a34204418", "boarding_type": "full", "monthly_rate": "350.00", "start_date": "2026-01-01"},
+      {"id": "f2d0a556-3273-47bc-956c-7b02940ec94e", "horse_id": "91cdd095-33e7-4d77-ac0c-cbc130be76a7", "stall_id": "e456e474-edb2-44d5-ae8c-7e85fd7c32ce", "boarding_type": "partial", "monthly_rate": "200.00", "start_date": "2025-12-15"},
+      {"id": "c3a73078-d4b4-41cf-a4f8-a49cf6816088", "horse_id": "d14f64d0-5d20-436a-8740-cca2b1442b9d", "stall_id": "2b2dc7e5-b385-4dff-97e8-82ad88bfd35d", "boarding_type": "full", "monthly_rate": "400.00", "start_date": "2025-12-20"},
+      {"id": "860bc05d-1d7a-47bb-aabe-82107ee2f350", "horse_id": "a323c4e6-4d44-4b98-ba5f-8a21e468ac5a", "stall_id": "e228b0bb-c944-4156-b16c-420b87ff69c7", "boarding_type": "training", "monthly_rate": "500.00", "start_date": "2026-01-05"}
+    ],
+    "activities": [
+      {
+        "id": "edadf62b-dc54-4c05-9206-97326b406d23",
+        "horse_id": "e5ff0683-1f0f-45ba-94cf-5872e6bb36bd",
+        "user_id": "c1aa5f68-b087-47de-a388-2ef8f597f2a5",
+        "title": "This is a training schedule",
+        "description": "some training",
+        "activity_type": "training",
+        "scheduled_date": "2025-12-23",
+        "scheduled_time": "12:11:00",
+        "duration_minutes": 30,
+        "assigned_to": "Sharon",
+        "status": "completed",
+        "completed_at": "2025-12-24 14:43:24.141+00"
+      }
+    ],
+    "config": [
+      {
+        "id": "717aae90-cd6f-4390-8c18-a61844df5b46",
+        "key": "ha_token",
+        "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI4OWNkMTJhZDdjMmU0MDc0YTc2ZDg2ODM1NzQ2OGQzMCIsImlhdCI6MTc2NzIzMzY0OSwiZXhwIjoyMDgyNTkzNjQ5fQ.BxGsLdwOmhzklOSbBavFQOU681VaT3um7qZ0x1sRMyo"
+      },
+      {
+        "id": "18311737-ffbe-40a4-b5a5-241dd2b41d93",
+        "key": "ha_url",
+        "value": "https://ubijd9zvct3uaenhmtl4xihltxgk8bo8.ui.nabu.casa"
+      }
+    ]
+  }
+}
